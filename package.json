@@ -6,18 +6,32 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "classnames": "^2.2.6",
+    "google-protobuf": "^3.11.3",
+    "gulp": "^4.0.2",
+    "libphonenumber-js": "^1.7.40",
+    "localforage": "^1.7.3",
+    "prop-types": "latest",
+    "protobufjs": "^6.8.8",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.1"
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.3.1",
+    "recompose": "^0.30.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "ignorePatterns": [
+      "**/*_pb.js"
+    ]
   },
   "browserslist": {
     "production": [
@@ -30,5 +44,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "homepage": "http://geniusnut.github.io/react-app",
+  "devDependencies": {
+    "@material-ui/core": "^4.9.3",
+    "@material-ui/icons": "^4.9.1",
+    "dateformat": "^3.0.3",
+    "gh-pages": "^2.2.0",
+    "idb-keyval": "^3.2.0",
+    "react-i18next": "^11.3.2"
   }
 }

@@ -1,0 +1,29 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.user-tile {
+    width: 54px;
+    height: 54px;
+    z-index: 1;
+    position: relative;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.tile-small {
+    align-self: flex-end;
+}
+
+.user-tile.tile-small {
+    height: 33px;
+    width: 33px;
+}
+
+.user-tile.tile-big {
+    height: 120px;
+    width: 120px;
+}

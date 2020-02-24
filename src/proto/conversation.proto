@@ -1,0 +1,32 @@
+syntax = "proto3";
+package IMNut;
+
+option go_package = "IMNut";
+option java_package = "com.nut.im.core";
+
+enum ConversationType {
+    Single = 0;
+    Multiple = 1;
+    Sys = 2;
+}
+
+message MemNick {
+    string cid = 1;
+    string nick = 2;
+}
+
+message Conversation {
+    string id = 1;
+    string name = 2;
+    ConversationType type = 3;
+    repeated string cids = 4;
+    string creator = 5;
+    int32 version = 6;
+    repeated string members = 7; // dynamic
+    repeated MemNick nicks = 8; //
+}
+
+message ConversationList {
+    int32 limit = 1;
+    repeated Conversation convs = 2;
+}

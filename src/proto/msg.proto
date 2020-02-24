@@ -1,0 +1,58 @@
+syntax = "proto3";
+package IMNut;
+
+option go_package = "IMNut";
+option java_package = "com.nut.im.core";
+
+import "auxiliary.proto";
+
+enum MsgType {
+    Text = 0;
+    Picture = 1;
+    Voice = 2;
+    Redpacket = 3;
+    Auxiliary = 4; // not
+}
+
+message Msg {
+    string conversationId = 1;
+    string cid = 2;
+    MsgType type = 5;
+    bytes blob  = 6;
+    bytes blobExtra = 7;
+    int64 jetTs = 10;
+    int64 ackTs = 11;
+    int64 id = 12;
+}
+
+message MsgAck {
+    string conversationId = 1;
+    int64 id = 2;
+    int64 jetTs = 10;
+    int64 ackTs = 11;
+}
+
+message MsgRead {
+    string conversationId = 1;
+    int64 id = 2;
+    string cid = 3; //
+}
+
+message MsgList {
+    int32 limit = 1;
+    repeated Msg msgs = 2;
+}
+
+message Image {
+    string localPath = 1;
+    string cachePath = 2;
+    string filename = 3;
+    string imgUrl = 4;
+    int32 width = 5;
+    int32 height = 6;
+}
+
+message AuxiliaryMsg {
+    AuxiliaryType type = 1;
+    bytes blob = 2;
+}

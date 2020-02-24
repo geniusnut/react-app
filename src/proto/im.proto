@@ -1,0 +1,105 @@
+syntax = "proto3";
+package IMNut;
+
+option go_package = "IMNut";
+option java_package = "com.nut.im.core";
+
+import "msg.proto";
+import "conversation.proto";
+
+enum IMOperation {
+    Default = 0;
+    ClientOpen = 1;
+    ClientClose = 2;
+    ClientQuery = 3;
+
+    ConversationCreation = 1000;
+    ConversationMemberAdd = 1001;
+    ConversationMemberRemove = 1002;
+    ConversationQuery = 1003;
+    ConversationUpdateName = 1004;
+    ConversationLeave = 1005;
+    ConversationGroupInfo = 1006;
+    ConversationGroupJoin = 1007;
+    ConversationGroupNick = 1008;
+    ConversationMemberAdded = 1100;
+    ConversationMemberRemoved = 1101;
+
+    ConversationMessageSend = 2000;
+    ConversationMessageUpdate = 2001;
+    ConversationMessageQuery = 2002;
+    ConversationEnter = 2003;
+    ConversationExit = 2004;
+    ConversationMessageRead = 2005;
+
+    TargetMessagePush = 3000;
+    TargetMessageSend = 3001;
+    TargetConvPeerState = 3002;
+    TargetMessageRead = 3003;
+
+    Ack = 4000;
+    AckClientOpen = 4001;
+}
+
+enum Code {
+    Success = 0;
+    ErrNoPermission = 1;
+    ErrFailed = 2;
+}
+
+message NatsMsg {
+    IMOperation operation = 1;
+    bytes blob = 2;
+}
+
+message IMAck {
+    IMOperation operation = 1;
+    bytes blob = 2;
+}
+
+message IMRequest {
+    IMOperation operation = 1;
+    string cid = 2;
+    IMNut.Conversation conversation = 3;
+    IMNut.Msg msg = 4;
+    bytes blob = 5;
+    int64 ts = 10;
+}
+
+message IMResponse {
+    IMOperation operation = 1;
+    string cid = 2;
+    bytes blob = 3;
+    int64 ts = 10;
+}
+
+message OpResult {
+    Code code = 1;
+    string msg = 2;
+    bytes blob = 3;
+}
+
+message TgtMsgPush {
+    string c = 1;
+}
+
+message TgtPeerState {
+    string cid = 1;
+    bool login = 2;
+}
+
+message MessageQuery {
+    bool direct = 1;
+    int32 limit = 2;
+}
+
+message TgtGroupMemberAdded {
+    string convId = 1;
+    string invitor = 2;
+}
+
+message TgtGroupMemberRemoved {
+    string convId = 1;
+    string leaver = 2;
+    string kicker = 3;
+}

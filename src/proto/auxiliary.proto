@@ -1,0 +1,34 @@
+syntax = "proto3";
+package IMNut;
+
+option go_package = "IMNut";
+option java_package = "com.nut.im.core";
+
+// 用户自定义业务类型以及消息类型，用来增加im的可拓展性
+enum AuxiliaryType {
+    RedpacketOpened = 0;
+    Group = 1;
+    GroupKick = 2;
+}
+
+enum GroupInviteType {
+    Invitor = 0;
+    Invitee = 1;
+}
+
+message RedpacketOpenedMsg {
+    int64 msgId = 1;
+    string rpId = 2;
+    string convId = 3;
+}
+
+message GroupMsg {
+    repeated string cids = 1;
+    string invitor = 2;
+    GroupInviteType inviteType = 3;
+}
+
+message GroupKickMsg {
+    string kicker = 1;
+    string cid = 2;
+}
