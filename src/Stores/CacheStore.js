@@ -79,6 +79,7 @@ class CacheStore extends EventEmitter {
         (files || []).forEach(( x, index) => {
             FileStore.setDataUrl(index, x);
         });
+        return users;
     }
 
     getCache(chatIds) {
@@ -92,7 +93,6 @@ class CacheStore extends EventEmitter {
     }
 
     async saveUser(cid, user) {
-            console.log("CacheStore saveUser: ", cid, user)
         CacheManager.saveUser(cid, user)
     }
 

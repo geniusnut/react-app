@@ -1,14 +1,14 @@
 import FileStore from '../Stores/FileStore';
 import UserStore from '../Stores/UserStore';
 import axios from "axios";
+import IMController from '../Controllers/IMController';
 
-function getSrc(file) {
-    const dataUrl = file && FileStore.getDataUrl(file.id);
-    if (dataUrl) return dataUrl;
-
-    const blob = getBlob(file);
-
-    return FileStore.getBlobUrl(blob) || '';
+function getSrc(url) {
+    const blob = FileStore.get(url);
+    if (blob == null) {
+        IMController.downloadFile(url);
+    }
+    return blob;
 }
 
 function getBlob(file) {
@@ -17,14 +17,17 @@ function getBlob(file) {
 
 
 function getAvatar(url) {
-    return axios
-        .get(url, {
+    return axios.get('https://www.gravatar.com/avatar/7ad5ab35f81ff2a439baf00829ee6a23', {
             responseType: 'arraybuffer'
         })
         .then(response => Buffer.from(response.data, 'binary').toString('base64'))
 }
 
+function getRemoteFile(url) {
+}
+
 export {
     getBlob,
     getSrc,
+    getRemoteFile,
 }

@@ -35,8 +35,8 @@ class UserStore extends EventEmitter {
 
     };
     onClientUpdate = update => {
-
     };
+
     get(userId) {
         return this.items.get(userId);
     }

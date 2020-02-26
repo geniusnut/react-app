@@ -1,5 +1,6 @@
 
 import UserStore from '../Stores/UserStore';
+import AppStore from '../Stores/ApplicationStore';
 import AuthStore, {AuthStateEnum} from '../Stores/AuthorizationStore';
 import IMController from '../Controllers/IMController';
 
@@ -12,7 +13,9 @@ function updateUser(cid) {
 }
 
 function getUser(cid) {
+    if (!AppStore.cacheLoaded) return null
     const user = UserStore.get(cid)
+    console.log("getUser", cid, user, UserStore.items)
     if (user) {
         return user
     }

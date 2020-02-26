@@ -63,7 +63,7 @@ class MessageStore extends EventEmitter {
                 this.emitUpdate(update);
                 break
             }
-            case 'clientUpdateCacheLoaded': {
+            case 'clientUpdateMessagesLoaded': {
                 this.emitUpdate(update);
                 break;
             }

@@ -16,6 +16,7 @@ class IMController extends EventEmitter {
         super();
 
         this.userSet = new Set();
+        this.downloadSet = new Set();
         this.parameters = {};
         this.disablelog = true;
         this.localStorage = false;
@@ -193,6 +194,7 @@ class IMController extends EventEmitter {
             'openId': openId,
 
         }
+        console.log("IMController: ", new Error().stack);
         axios.post(CLIENT_PROFILE_URL_TEST, 'cid='+cid, {
             headers: headers
         }).then(data => {
@@ -208,6 +210,25 @@ class IMController extends EventEmitter {
         }).catch(e => {
             console.log(e);
             this.userSet.delete(cid);
+        })
+    }
+
+    async downloadFile(url) {
+        if (this.downloadSet.has(url)) {
+            return
+        }
+        this.downloadSet.add(url)
+        axios.get(url)
+            .then(response => {
+                console.log('IMController downloadFile', response.data)
+                this.update({
+                    '@type': 'downloadFile',
+                    url: url,
+                    file: response.data,
+                })
+                //Buffer.from(response.data, 'binary').toString('base64')
+            }).catch(e => {
+                console.log('IMController downloadFile',e)
         })
     }
 }

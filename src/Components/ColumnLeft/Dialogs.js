@@ -22,8 +22,6 @@ class Dialogs extends React.Component {
     async loadCache() {
         const cache = (await CacheStore.loadCache()) || {};
 
-        const { chats, archiveChats } = cache;
-
         this.setState({
             cache,
         });
@@ -35,7 +33,6 @@ class Dialogs extends React.Component {
 
     handleHeaderClick = () => {
         this.dialogListRef.current.scrollToTop();
-
     };
 
     render() {

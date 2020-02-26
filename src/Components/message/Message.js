@@ -345,7 +345,7 @@ class Message extends Component {
         const hasCaption = false; // text !== null && text.length > 0;
         const hasTitle = false; // showTitle || showForward || Boolean(reply_to_message_id);
 
-        let tile = null;
+        let tile = <UserTile small userId={sender_user_id} onSelect={this.handleSelectUser} />;
         if (showTail) {
             tile = sender_user_id ? (
                 <UserTile small userId={sender_user_id} onSelect={this.handleSelectUser} />
@@ -355,7 +355,7 @@ class Message extends Component {
         }
 
         const style = this.getMessageStyle(chatId, messageId);
-        const withBubble = false;
+        const withBubble = true;
 
         return (
             <div

@@ -13,6 +13,7 @@ import ChatStore from '../../Stores/ChatStore';
 import './DialogTitle.css';
 import {getPeerUser} from "../../Utils/User";
 import UserStore from "../../Stores/UserStore";
+import AppStore from "../../Stores/ApplicationStore";
 
 class DialogTitle extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
@@ -33,12 +34,18 @@ class DialogTitle extends React.Component {
         ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
         UserStore.on('updateUser', this.updateUser);
+        AppStore.on('clientUpdateCacheLoaded', this.onUpdateCache);
     }
 
     componentWillUnmount() {
         ChatStore.off('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.off('updateChatTitle', this.onUpdateChatTitle);
         UserStore.on('updateUser', this.updateUser);
+        AppStore.off('clientUpdateCacheLoaded', this.onUpdateCache);
+    }
+
+    onUpdateCache = update => {
+        this.forceUpdate()
     }
 
     onFastUpdatingComplete = update => {

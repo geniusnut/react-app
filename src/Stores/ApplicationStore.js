@@ -12,6 +12,7 @@ class ApplicationStore extends EventEmitter {
     }
 
     reset = () => {
+        this.cacheLoaded = false;
         this.cid = null;
         this.chatId = 0;
         this.dialogChatId = 0;
@@ -47,6 +48,11 @@ class ApplicationStore extends EventEmitter {
     onClientUpdate = update => {
         console.log("Appstore", update)
         switch (update['@type']) {
+            case 'clientUpdateCacheLoaded': {
+                this.cacheLoaded = true;
+                this.emit('clientUpdateCacheLoaded');
+                break;
+            }
             case 'clientUpdateChatId': {
                 const extendedUpdate = {
                     '@type': 'clientUpdateChatId',

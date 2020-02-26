@@ -8,11 +8,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { getSrc } from '../../Utils/File';
 import UserStore from '../../Stores/UserStore';
+import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import './UserTile.css';
+import UserAvatar from "../../Assets/default_avatar.png";
 
 class UserTile extends Component {
     constructor(props) {
@@ -47,6 +48,7 @@ class UserTile extends Component {
         FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.on('updateChatPhoto', this.onUpdateChatPhoto);
         ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
+        AppStore.on('clientUpdateCacheLoaded', this.onUpdateCache);
     }
 
     componentWillUnmount() {
@@ -54,6 +56,11 @@ class UserTile extends Component {
         FileStore.off('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.off('updateChatPhoto', this.onUpdateChatPhoto);
         ChatStore.off('updateChatTitle', this.onUpdateChatTitle);
+        AppStore.off('clientUpdateCacheLoaded', this.onUpdateCache);
+    }
+
+    onUpdateCache = update => {
+        this.forceUpdate()
     }
 
     onClientUpdateUserBlob = update => {
@@ -145,10 +152,8 @@ class UserTile extends Component {
         const { loaded } = this.state;
 
         const user = UserStore.get(userId);
-        if (!user && !(fistName || lastName)) return null;
 
-        const letters = "getUserLetters";
-        const src = getSrc(user && user.profile_photo ? user.profile_photo.small : null);
+        const src = user && user.avatar ? user.avatar : UserAvatar;
         const tileLoaded = src && loaded;
 
         const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;
@@ -157,15 +162,11 @@ class UserTile extends Component {
             <div
                 className={classNames(
                     'user-tile',
-                    { [tileColor]: !tileLoaded },
-                    { pointer: onSelect },
                     { 'tile-small': small }
                 )}
                 onClick={this.handleSelect}>
                 {!tileLoaded && (
-                    <div className='tile-photo'>
-                        <span className='tile-text'>{letters}</span>
-                    </div>
+                    <div className='tile-photo' src={UserAvatar}/>
                 )}
                 {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
             </div>
@@ -174,7 +175,7 @@ class UserTile extends Component {
 }
 
 UserTile.propTypes = {
-    userId: PropTypes.number.isRequired,
+    userId: PropTypes.string.isRequired,
     firstName: PropTypes.string,
     lastName: PropTypes.string,
     onSelect: PropTypes.func,

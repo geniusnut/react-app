@@ -44,7 +44,7 @@ class DialogDetails extends React.Component {
         const cache = (await CacheStore.loadMessages(this.state.chatId)) || {};
 
         IMController.clientUpdate({
-            '@type': 'clientUpdateCacheLoaded'
+            '@type': 'clientUpdateMessagesLoaded'
         });
     }
 

@@ -11,6 +11,15 @@ class FileStore extends EventEmitter {
         this.setMaxListeners(Infinity);
     }
 
+    reset = () => {
+
+        //this.transactionCount = 0;
+        this.db = null;
+        this.urls = new WeakMap();
+        this.dataUrls = new Map();
+        this.items = new Map();
+    };
+
     addIMListener() {
         IMController.addListener('update', this.onUpdate);
         IMController.addListener('clientUpdate', this.onClientUpdate);
@@ -26,22 +35,27 @@ class FileStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'downloadFile': {
+                const {url, file} = update;
+                this.set(url, file)
+            }
             default:
                 break;
         }
     };
 
+    set(url, file) {
+        this.items.set(url, file);
+    }
+
+    get(url) {
+        return this.items.get(url);
+    }
+
     onClientUpdate = update => {
         switch (update['@type']) {
 
         }
-    }
-    reset = () => {
-
-        this.db = null;
-        this.urls = new WeakMap();
-        this.dataUrls = new Map();
-        this.items = new Map();
     };
 
     setDataUrl = (id, dataUrl) => {
@@ -68,6 +82,11 @@ class FileStore extends EventEmitter {
         if (this.urls.has(blob)) {
             return this.urls.get(blob);
         }
+
+        const url = URL.createObjectURL(blob);
+        this.urls.set(blob, url);
+
+        return url;
     }
 }
 

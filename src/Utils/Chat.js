@@ -2,7 +2,7 @@
 import dateFormat from 'dateformat';
 import ChatStore from '../Stores/ChatStore';
 import {getContent} from "./Message";
-import {getPeerCid, getPeerUser, getUser} from "./User";
+import {getPeerUser} from "./User";
 
 function isSingleChat(chat) {
     return !chat && chat.getType() === 0;

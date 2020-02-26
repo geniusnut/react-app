@@ -33,7 +33,7 @@ class MessagesList extends React.Component {
     componentDidMount() {
         MessageStore.on('tgtMsgSend', this.onNewMessage);
         MessageStore.on('msgAck', this.onAckMessage);
-        MessageStore.on('clientUpdateCacheLoaded', this.onLoadCache)
+        MessageStore.on('clientUpdateMessagesLoaded', this.onLoadCache)
         MessageStore.on('msgRead', this.onReadMessage);
         MessageStore.on('clientSendMessage', this.onSendMessage);
     }
@@ -41,7 +41,7 @@ class MessagesList extends React.Component {
     componentWillUnmount() {
         MessageStore.off('tgtMsgSend', this.onNewMessage);
         MessageStore.off('msgAck', this.onAckMessage);
-        MessageStore.off('clientUpdateCacheLoaded', this.onLoadCache)
+        MessageStore.off('clientUpdateMessagesLoaded', this.onLoadCache)
         MessageStore.off('msgRead', this.onReadMessage);
         MessageStore.off('clientSendMessage', this.onSendMessage);
     }

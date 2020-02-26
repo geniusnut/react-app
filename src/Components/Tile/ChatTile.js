@@ -1,9 +1,9 @@
 import React from "react";
 import classNames from 'classnames';
 import * as PropTypes from "prop-types";
-import {getSrc} from "../../Utils/File";
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
+import AppStore from '../../Stores/ApplicationStore';
 import './ChatTile.css';
 import GroupAvatar from '../../Assets/im_group_avatar.png'
 import UserAvatar from '../../Assets/default_avatar.png'
@@ -35,19 +35,24 @@ class ChatTile extends React.Component {
 
     componentDidMount() {
         UserStore.on('updateUser', this.updateUser);
+        AppStore.on('clientUpdateCacheLoaded', this.onUpdateCache);
     }
 
     componentWillUnmount() {
         UserStore.off('updateUser', this.updateUser);
+        AppStore.off('clientUpdateCacheLoaded', this.onUpdateCache);
+    }
+
+    onUpdateCache = update => {
+        this.forceUpdate()
     }
 
     updateUser = update => {
-        console.log("chattile updateUser: ", this.props.extra, update)
         if (this.props.extra !== update.user.cid) {
             return
         }
         this.forceUpdate();
-    }
+    };
 
     handleLoad = () => {
         this.setState({ loaded: true });
@@ -76,8 +81,8 @@ class ChatTile extends React.Component {
 
     getSingleCover() {
         const extra = this.props.extra;
-        const user = getUser(extra);
-        return user !== null ? user.avatar : UserAvatar;
+        const user = AppStore.cacheLoaded ? getUser(extra) : null;
+        return user && user.avatar ? user.avatar : UserAvatar;
     }
 
     getGroupCover() {
@@ -87,7 +92,6 @@ class ChatTile extends React.Component {
 
 ChatTile.propTypes = {
     chatId: PropTypes.string.isRequired,
-    extra: PropTypes.string.isRequired
 };
 
 export default ChatTile;

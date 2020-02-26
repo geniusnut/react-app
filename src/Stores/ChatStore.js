@@ -1,6 +1,7 @@
 import {EventEmitter} from "events";
 import IMController from '../Controllers/IMController';
 import CacheStore from './CacheStore';
+import AppStore from './ApplicationStore';
 
 class ChatStore extends EventEmitter {
     constructor() {
@@ -16,6 +17,7 @@ class ChatStore extends EventEmitter {
     };
 
     set(chat) {
+        console.log("ChatStore set", chat.id, chat)
         this.items.set(chat.id, chat);
     }
 
@@ -57,12 +59,15 @@ class ChatStore extends EventEmitter {
     updateConv(conv) {
         let chat = this.items.get(conv.getId());
         if (!chat) {
+            console.log('ChatStore new conv: ', conv);
             var extra = conv.getType() === 0 ? conv.getCidsList().find(cid => {
                     return !(cid === IMController.state.cid)
                 }) : conv.getMembersList();
             chat = {id: conv.getId(), conv:conv, type: conv.getType(), extra: extra, last_ts:0}
-            this.items.set(conv.getId(), chat);
-            CacheStore.saveChat(conv.getId(), chat);
+            this.set(chat);
+            if (AppStore.cacheLoaded) {
+                CacheStore.saveChat(conv.getId(), chat);
+            }
             return;
         }
         this.assign(chat, {conv:conv})
