@@ -1,25 +1,30 @@
 import {EventEmitter} from "events";
-import {WS_URL} from "../Constants";
+import {CLIENT_PROFILE_URL_TEST, WS_URL} from "../Constants";
+import axios from 'axios';
 var im_pb = require('../gen/im_pb');
 var conv_pb = require('../gen/conversation_pb');
 var msg_pb = require('../gen/msg_pb');
 
 class IMController extends EventEmitter {
     state = {
-        cid: "83ed7501a1918f33ff24e6a4",
+        cid: null,
         messages: [],
     };
-    ws = new WebSocket(WS_URL );
+    ws;
 
     constructor() {
         super();
 
+        this.userSet = new Set();
         this.parameters = {};
         this.disablelog = true;
         this.localStorage = false;
     }
 
-    init = () => {
+    init = (cid) => {
+        console.log("IMController init")
+        this.ws = new WebSocket(WS_URL);
+        this.state.cid = cid
         this.ws.binaryType = 'arraybuffer';
         this.ws.onopen = () => {
             console.log("onopen");
@@ -69,7 +74,7 @@ class IMController extends EventEmitter {
             }
             case im_pb.IMOperation.CONVERSATIONMESSAGESEND: {
                 const msgAck = msg_pb.MsgAck.deserializeBinary(response.getBlob())
-                console.log("CONVERSATIONMESSAGESEND, ", msgAck);
+                // console.log("CONVERSATIONMESSAGESEND, ", msgAck);
                 this.emit("update", {
                     '@type': 'msgAck',
                     msgAck: msgAck,
@@ -80,7 +85,7 @@ class IMController extends EventEmitter {
 
             case im_pb.IMOperation.CONVERSATIONMESSAGEREAD: {
                 const msgRead = msg_pb.MsgRead.deserializeBinary(response.getBlob())
-                console.log("CONVERSATIONMESSAGEREAD, ", msgRead);
+                // console.log("CONVERSATIONMESSAGEREAD, ", msgRead);
                 this.emit("update", {
                     '@type': 'msgRead',
                     msgRead: msgRead,
@@ -106,7 +111,7 @@ class IMController extends EventEmitter {
         }
         const msgRead = new msg_pb.MsgRead();
         msgRead.setCid(msg.getCid());
-        msgRead.setId(msgId);
+        msgRead.setId(msg.getId());
         msgRead.setConversationid(convId);
         const request = new im_pb.IMRequest();
         request.setCid(this.state.cid);
@@ -129,6 +134,13 @@ class IMController extends EventEmitter {
         request.setOperation(im_pb.IMOperation.CONVERSATIONQUERY);
         request.setTs(Date.now());
         this.send(request);
+    }
+
+    update = update => {
+        if (!this.disableLog) {
+            console.log('update', update);
+        }
+        this.emit('update', update);
     }
 
     clientUpdate = update => {
@@ -168,6 +180,35 @@ class IMController extends EventEmitter {
             msg: msg,
         }
         this.clientUpdate(update)
+    }
+
+    async getUser(uid, token, openId, cid) {
+        if (this.userSet.has(cid)) {
+            return
+        }
+        this.userSet.add(cid)
+        const headers = {
+            'uid': uid,
+            'token': token,
+            'openId': openId,
+
+        }
+        axios.post(CLIENT_PROFILE_URL_TEST, 'cid='+cid, {
+            headers: headers
+        }).then(data => {
+            console.log(data);
+            if (data.data.code === 200) {
+                this.update({
+                    '@type': 'updateUser',
+                    'user': data.data.data,
+                })
+            } else {
+                this.userSet.delete(cid);
+            }
+        }).catch(e => {
+            console.log(e);
+            this.userSet.delete(cid);
+        })
     }
 }
 

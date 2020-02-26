@@ -1,5 +1,6 @@
 import {EventEmitter} from "events";
 import IMController from "../Controllers/IMController";
+import CacheStore from './CacheStore';
 
 class UserStore extends EventEmitter {
     constructor() {
@@ -22,6 +23,15 @@ class UserStore extends EventEmitter {
     }
 
     onUpdate = update => {
+        switch (update['@type']) {
+            case 'updateUser': {
+                const {user} = update;
+                this.set(user);
+                CacheStore.saveUser(user.cid, user);
+                this.emit(update['@type'], update);
+                break;
+            }
+        }
 
     };
     onClientUpdate = update => {
@@ -32,7 +42,7 @@ class UserStore extends EventEmitter {
     }
 
     set(user) {
-        this.items.set(user.id, user);
+        this.items.set(user.cid, user);
     }
 }
 

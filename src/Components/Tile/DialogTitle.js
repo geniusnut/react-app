@@ -11,6 +11,8 @@ import { withTranslation } from 'react-i18next';
 import { getChatTitle } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogTitle.css';
+import {getPeerUser} from "../../Utils/User";
+import UserStore from "../../Stores/UserStore";
 
 class DialogTitle extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
@@ -30,11 +32,13 @@ class DialogTitle extends React.Component {
     componentDidMount() {
         ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
+        UserStore.on('updateUser', this.updateUser);
     }
 
     componentWillUnmount() {
         ChatStore.off('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.off('updateChatTitle', this.onUpdateChatTitle);
+        UserStore.on('updateUser', this.updateUser);
     }
 
     onFastUpdatingComplete = update => {
@@ -49,6 +53,13 @@ class DialogTitle extends React.Component {
         this.forceUpdate();
     };
 
+    updateUser = update => {
+        if (this.props.extra !== update.user.cid) {
+            return
+        }
+        this.forceUpdate();
+    }
+
     render() {
         const { t, chatId, showSavedMessages } = this.props;
 
@@ -56,14 +67,14 @@ class DialogTitle extends React.Component {
 
         return (
             <div className='dialog-title'>
-                <span className='dialog-title-span'>{this.props.chatId}</span>
+                <span className='dialog-title-span'>{title}</span>
             </div>
         );
     }
 }
 
 DialogTitle.propTypes = {
-    chatId: PropTypes.number.isRequired,
+    chatId: PropTypes.string.isRequired,
     showSavedMessages: PropTypes.bool
 };
 

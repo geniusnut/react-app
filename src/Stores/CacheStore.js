@@ -2,8 +2,10 @@ import IMController from "../Controllers/IMController";
 import {debounce} from "../Utils/Common";
 import CacheManager from '../Workers/CacheManager';
 import {EventEmitter} from "events";
-import ChatStore from './ChatStore';
 import MessageStore from './MessageStore';
+import UserStore from './UserStore';
+import FileStore from './FileStore';
+import ChatStore from './ChatStore';
 
 class CacheStore extends EventEmitter {
     constructor() {
@@ -19,7 +21,6 @@ class CacheStore extends EventEmitter {
 
     reset = () => {
         this.chatIds = [];
-        this.cache = null;
     };
 
     addIMListener() {
@@ -62,21 +63,22 @@ class CacheStore extends EventEmitter {
 
     async loadCache() {
         const promises = [];
-        promises.push(CacheManager.load('cache').catch(error => null));
-        const [cache, files] = await Promise.all(promises);
-        this.cache = cache;
+        promises.push(CacheManager.loadChats().catch(error => null));
+        promises.push(CacheManager.loadUsers().catch(error => null));
+        promises.push(CacheManager.loadFiles().catch(error => null));
 
-        if (!this.cache) return null;
-
-        this.parseCache(this.cache);
-
-        return this.cache;
-    }
-
-    parseCache(cache) {
-        if (!cache) return;
-
-        const {chats} = cache;
+        const [chats, users, files] = await Promise.all(promises);
+        (chats || []).forEach((x, index) => {
+            ChatStore.set(x)
+        });
+        //
+        (users || []).forEach((x, index) => {
+            UserStore.set(x);
+        });
+        //
+        (files || []).forEach(( x, index) => {
+            FileStore.setDataUrl(index, x);
+        });
     }
 
     getCache(chatIds) {
@@ -87,6 +89,15 @@ class CacheStore extends EventEmitter {
         return {
             chats,
         };
+    }
+
+    async saveUser(cid, user) {
+            console.log("CacheStore saveUser: ", cid, user)
+        CacheManager.saveUser(cid, user)
+    }
+
+    async saveChat(chatId, chat) {
+        CacheManager.saveChat(chatId, chat)
     }
 
     saveChats(chatIds) {

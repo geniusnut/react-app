@@ -54,7 +54,6 @@ class DialogMeta extends React.Component {
     onUpdate = update => {
 
         const { chatId } = this.props;
-        console.log("dialogmeta update", chatId, update);
 
         if (chatId !== update.chatId) return;
 
@@ -67,11 +66,11 @@ class DialogMeta extends React.Component {
         const { chatId } = this.props;
 
         const chat = ChatStore.get(chatId);
-        console.log("dialogmeta", chat);
         if (!chat) return null;
 
         const { last_msg } = chat;
         if (!last_msg) return null;
+        console.log("dialogmeta", chat);
 
         const date = getLastMessageDate(chat);
         if (!date) return null;

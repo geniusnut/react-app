@@ -2,10 +2,21 @@
 import dateFormat from 'dateformat';
 import ChatStore from '../Stores/ChatStore';
 import {getContent} from "./Message";
+import {getPeerCid, getPeerUser, getUser} from "./User";
+
+function isSingleChat(chat) {
+    return !chat && chat.getType() === 0;
+}
 
 function getChatTitle(chatId, showSavedMessages = false, t = key => key) {
     const chat = ChatStore.get(chatId);
-    if (!chat) return null;
+    if (!chat || !chat.conv) return null;
+    if (chat.conv.getType() === 1) {
+        return chat.conv.getName() || '未命名'
+    }
+    const user = getPeerUser(chat.conv)
+    if (!user) return null;
+    return user.nick;
 }
 
 function getMessageDate(message) {
@@ -57,6 +68,7 @@ function getLastMessageContent(chat, t = key => key) {
 }
 
 export {
+    isSingleChat,
     getChatTitle,
     getLastMessageDate,
     getLastMessageSenderName,

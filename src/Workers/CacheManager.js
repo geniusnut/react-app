@@ -9,6 +9,7 @@
 import {set, get, del, clear, keys, Store} from 'idb-keyval';
 import IMController from '../Controllers/IMController';
 var msg_pb = require('../gen/msg_pb');
+var conv_pb = require('../gen/conversation_pb');
 
 class CacheManager {
     constructor() {
@@ -17,6 +18,9 @@ class CacheManager {
         //
         this.handlers = new Map();
         this.messageM = new Map();
+        this.userStore = new Store('user')
+        this.chatStore = new Store('chat')
+        this.fileStore = new Store('file')
     }
 
     onWorkerMessage = event => {
@@ -60,6 +64,40 @@ class CacheManager {
         //return await store.getItem(key);
     }
 
+    async loadChats() {
+        const m = new Map();
+        const ids = (await keys(this.chatStore));
+        for (let k of ids) {
+            let v = await get(k, this.chatStore)
+            if (v && v.conv) {
+                v = {...v, conv: conv_pb.Conversation.deserializeBinary(v.conv)}
+                if (v.last_msg) {
+                    v = {...v, last_msg: msg_pb.Msg.deserializeBinary(v.last_msg)}
+                }
+            }
+            m.set(k, v)
+        }
+        return m
+    }
+
+    async loadFiles() {
+        return this.loadStore(this.fileStore)
+    }
+
+    async loadUsers() {
+        return this.loadStore(this.userStore)
+    }
+
+    async loadStore(store) {
+        const m = new Map();
+        const ids = (await keys(store));
+        for (let k of ids) {
+            let v = await get(k, store)
+            m.set(k, v)
+        }
+        return m
+    }
+
     async save(key, cache) {
         if (IMController.localStorage) {
             localStorage.setItem(key, JSON.stringify(cache));
@@ -69,6 +107,18 @@ class CacheManager {
 
         //const store = localforage.createInstance({ name: 'telegram' });
         //await store.setItem(key, cache);
+    }
+
+    async saveUser(key, cache) {
+        set(key, cache, this.userStore)
+    }
+
+    async saveChat(convId, chat) {
+        chat = {...chat, conv: chat.conv.serializeBinary()}
+        if (chat.last_msg) {
+            chat = {...chat, last_msg: chat.last_msg.serializeBinary()}
+        }
+        set(convId, chat, this.chatStore)
     }
 
     async saveMessage(convId, key, message) {
@@ -92,7 +142,6 @@ class CacheManager {
 
         const m = new Map();
         const ids = (await keys(store));
-        console.log("CacheStore loadMessages ids: ", ids);
         for (let id of ids) {
             let message = await get(id, store)
             if (message && message.msg) {

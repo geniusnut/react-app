@@ -1,17 +1,18 @@
 import {EventEmitter} from "events";
 import IMController from "../Controllers/IMController";
+import {AuthStateEnum} from "./AuthorizationStore";
 
 class ApplicationStore extends EventEmitter {
     constructor() {
         super();
 
         this.reset();
-
         this.addIMListener();
+        this.setMaxListeners(Infinity);
     }
 
     reset = () => {
-        this.cid = '83ed7501a1918f33ff24e6a4';
+        this.cid = null;
         this.chatId = 0;
         this.dialogChatId = 0;
         this.messageId = 0;
@@ -44,6 +45,7 @@ class ApplicationStore extends EventEmitter {
     };
 
     onClientUpdate = update => {
+        console.log("Appstore", update)
         switch (update['@type']) {
             case 'clientUpdateChatId': {
                 const extendedUpdate = {
@@ -59,6 +61,13 @@ class ApplicationStore extends EventEmitter {
 
                 console.log("AppStore, clientUpdateChatId", extendedUpdate)
                 this.emit('clientUpdateChatId', extendedUpdate);
+                break;
+            }
+            case 'clientUpdateAuthState': {
+                if (update.auth_state === AuthStateEnum.STATE_LOGIN) {
+                    this.cid = update.uid;
+                }
+                this.emit(update['@type'], update);
                 break;
             }
             default: {

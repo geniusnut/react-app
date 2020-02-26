@@ -1,5 +1,6 @@
 import {EventEmitter} from "events";
 import IMController from '../Controllers/IMController';
+import CacheStore from './CacheStore';
 
 class ChatStore extends EventEmitter {
     constructor() {
@@ -7,6 +8,7 @@ class ChatStore extends EventEmitter {
         this.reset();
 
         this.addIMListener();
+        this.setMaxListeners(Infinity);
     }
 
     reset = () => {
@@ -47,13 +49,20 @@ class ChatStore extends EventEmitter {
 
     assign(source1, source2) {
         //Object.assign(source1, source2);
-        this.set(Object.assign({}, source1, source2));
+        const chat = Object.assign({}, source1, source2);
+        this.set(chat);
+        CacheStore.saveChat(chat.id, chat);
     }
 
     updateConv(conv) {
-        const chat = this.items.get(conv.getId());
+        let chat = this.items.get(conv.getId());
         if (!chat) {
-            this.items.set(conv.getId(), {id: conv.getId(), conv:conv, type: conv.getType(), last_ts:0});
+            var extra = conv.getType() === 0 ? conv.getCidsList().find(cid => {
+                    return !(cid === IMController.state.cid)
+                }) : conv.getMembersList();
+            chat = {id: conv.getId(), conv:conv, type: conv.getType(), extra: extra, last_ts:0}
+            this.items.set(conv.getId(), chat);
+            CacheStore.saveChat(conv.getId(), chat);
             return;
         }
         this.assign(chat, {conv:conv})

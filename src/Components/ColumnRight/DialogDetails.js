@@ -68,11 +68,9 @@ class DialogDetails extends React.Component {
     };
 
     render() {
-
         this.loadCache();
         const { chatId, messageId, selectedCount } = this.state;
 
-        console.log("DialogDetails chatId: ", chatId);
         return (
             <div
                 className={'dialog-details'}>

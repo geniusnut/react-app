@@ -8,6 +8,7 @@ import {
     Button,
     IconButton
 } from '@material-ui/core';
+import AuthStore from '../../Stores/AuthorizationStore'
 import './Header.css';
 
 class DialogsHeader extends React.Component {
@@ -23,10 +24,12 @@ class DialogsHeader extends React.Component {
     };
 
     render() {
+
+        const title = AuthStore.current ? AuthStore.current.nick : "IMNut";
         return (
             <div className='header-master'>
                 <div className='header-status grow cursor-pointer'>
-                    <span className='header-status-content'>{('IMNut')}</span>
+                    <span className='header-status-content'>{title}</span>
                 </div>
             </div>
         );

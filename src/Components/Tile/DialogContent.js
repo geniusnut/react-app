@@ -2,7 +2,7 @@ import * as React from "react";
 import {withTranslation} from "react-i18next";
 import ChatStore from '../../Stores/ChatStore';
 import './DialogContent.css';
-import {getLastMessageContent, getLastMessageSenderName} from "../../Utils/Chat";
+import {getLastMessageContent, getLastMessageSenderName, isSingleChat} from "../../Utils/Chat";
 
 class DialogContent extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
@@ -41,10 +41,10 @@ class DialogContent extends React.Component {
         const chat = ChatStore.get(chatId);
 
         const content = getLastMessageContent(chat, t) || '\u00A0';
-        const senderName = getLastMessageSenderName(chat);
+        const senderName = isSingleChat(chat) ? null : getLastMessageSenderName(chat);
 
         return <div className='dialog-content'>
-            {senderName && <span className='dialog-content-accent'>{senderName}: </span>}
+            {/*{senderName && <span className='dialog-content-accent'>{senderName}: </span>}*/}
             {content}
         </div>;
     }

@@ -106,8 +106,7 @@ class Dialog extends React.Component {
     getViewInfoTitle = () => {
         const {chatId,} = this.props;
         const chat = ChatStore.get(chatId);
-        console.log("getViewInfoTitle", chatId, chat)
-        if (!chat) return;
+        if (!chat || !chat.conv) return;
         switch (chat.conv.getType()) {
             case 0 : {
                 return 'Single';
@@ -125,7 +124,8 @@ class Dialog extends React.Component {
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
 
-        console.log("currentChatId: ", currentChatId);
+        const chat = ChatStore.get(chatId);
+        const {extra} = chat;
         return (
             <>
                 <div
@@ -134,10 +134,10 @@ class Dialog extends React.Component {
                     onMouseDown={this.handleSelect}
                     onContextMenu={this.handleContextMenu}>
                     <div className='dialog-wrapper'>
-                        <ChatTile chatId={chatId} />
+                        <ChatTile chatId={chatId} extra={extra}/>
                         <div className='dialog-inner-wrapper'>
                             <div className='tile-first-row'>
-                                <DialogTitle chatId={chatId} />
+                                <DialogTitle chatId={chatId} extra={extra} />
                                 <DialogMeta chatId={chatId} />
                             </div>
                             <div className='tile-second-row'>
@@ -171,7 +171,7 @@ class Dialog extends React.Component {
 }
 
 Dialog.propTypes = {
-    chatId: PropTypes.number.isRequired,
+    chatId: PropTypes.string.isRequired,
 };
 
 export default Dialog;

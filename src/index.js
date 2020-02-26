@@ -2,11 +2,18 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import * as serviceWorker from './serviceWorker';
+import LoginRedirect from "./Components/Auth/LoginRedirect";
 
 
 ReactDOM.render(
-    <App />,
+    <Router>
+        <Switch>
+            <Route exact path="/" component={App}/>
+            <Route path="/login/redirect/" component={LoginRedirect} />
+        </Switch>
+    </Router>,
     document.getElementById('root'));
 
 
