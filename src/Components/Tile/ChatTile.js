@@ -63,7 +63,7 @@ class ChatTile extends React.Component {
         const { loaded } = this.state;
 
         const chat = ChatStore.get(chatId);
-        const { type, extra } = chat;
+        const { type } = chat;
         const src = type === 0 ? this.getSingleCover() : this.getGroupCover();
 
         const tileLoaded = src && loaded;

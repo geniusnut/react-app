@@ -11,7 +11,6 @@ import { withTranslation } from 'react-i18next';
 import { getChatTitle } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogTitle.css';
-import {getPeerUser} from "../../Utils/User";
 import UserStore from "../../Stores/UserStore";
 import AppStore from "../../Stores/ApplicationStore";
 

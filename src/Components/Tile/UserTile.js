@@ -97,21 +97,19 @@ class UserTile extends Component {
                 } else {
                     this.forceUpdate();
                 }
+                break;
+            }
+            default: {
+                break;
             }
         }
     };
 
     onUpdateChatPhoto = update => {
-        const { userId } = this.props;
-        const { chat_id, photo } = update;
+        const { chat_id } = update;
 
         const chat = ChatStore.get(chat_id);
-        if (!chat) return;
-        if (!chat.type) return;
-
-        switch (chat.type['@type']) {
-
-        }
+        if (!chat || !chat.type) return;
     };
 
     onUpdateChatTitle = update => {
@@ -148,15 +146,12 @@ class UserTile extends Component {
     };
 
     render() {
-        const { userId, fistName, lastName, onSelect, small } = this.props;
+        const { userId, small } = this.props;
         const { loaded } = this.state;
 
         const user = UserStore.get(userId);
-
         const src = user && user.avatar ? user.avatar : UserAvatar;
         const tileLoaded = src && loaded;
-
-        const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;
 
         return (
             <div

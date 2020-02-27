@@ -21,9 +21,6 @@ class AuthFormControl extends React.Component {
     }
 
     render() {
-        const {authorizationState: state} = this.props;
-        const {data} = this.state;
-
         return (
             <div className='authorization-form'>
                 <div className='authorization-form-content'>
@@ -39,7 +36,7 @@ class AuthFormControl extends React.Component {
                         fullWidth
                         color='primary'
                         onClick={this.scanQrCode}>
-                        {'ScanQRCode'}
+                        {'扫码登录'}
                     </Button>
                 </div>
             </div>

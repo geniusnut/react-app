@@ -11,7 +11,8 @@ import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import CheckMarkIcon from '@material-ui/icons/Check';
 import {
-    getText,
+    getMedia,
+    getText, openMedia,
 } from '../../Utils/Message';
 import UserTile from '../Tile/UserTile';
 import ChatTile from '../Tile/ChatTile';
@@ -20,13 +21,11 @@ import {
     openUser,
     openChat,
     selectMessage,
-    openReply,
 } from '../../Actions/Client';
 import { getFitSize, getSize } from '../../Utils/Common';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import AppStore from '../../Stores/ApplicationStore';
-import IMController from '../../Controllers/IMController';
 import './Message.css';
 
 class Message extends Component {
@@ -320,6 +319,17 @@ class Message extends Component {
         return null;
     }
 
+    openMedia = event => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const { chatId, messageId } = this.props;
+
+        openMedia(chatId, messageId);
+    };
+
     render() {
         const { t, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
         const { emojiMatches, selected, highlighted, contextMenu, left, top } = this.state;
@@ -344,6 +354,7 @@ class Message extends Component {
         const text = getText(msg);
         const hasCaption = false; // text !== null && text.length > 0;
         const hasTitle = false; // showTitle || showForward || Boolean(reply_to_message_id);
+        const media = getMedia(msg, this.openMedia, chatId, messageId);
 
         let tile = <UserTile small userId={sender_user_id} onSelect={this.handleSelectUser} />;
         if (showTail) {
@@ -380,6 +391,7 @@ class Message extends Component {
                                 'message-bubble-out': withBubble && is_outgoing
                             })}
                             style={style}>
+                            {media}
                             <div
                                 className={classNames('message-text')}>
                                 {text}

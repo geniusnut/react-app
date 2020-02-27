@@ -18,7 +18,7 @@ class LoginRedirect extends React.Component {
                 '@type': "updateAuthState",
                 data: authData,
             })
-            // window.location.href = '/';
+            window.location.href = '/';
         }).catch(err => {
             console.log(err)
             const authData = {auth_state: AuthStateEnum.STATE_FAILED}
