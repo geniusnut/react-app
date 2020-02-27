@@ -18,12 +18,14 @@ class DialogsList extends React.Component {
     componentDidMount() {
         ChatStore.on("queryConv", this.onQueryConv);
         ChatStore.on("tgtMsgSend", this.updateOrder);
+        ChatStore.on("msgAcked", this.updateOrder);
     }
 
 
     componentWillUnmount() {
         ChatStore.off("queryConv", this.onQueryConv);
         ChatStore.on("tgtMsgSend", this.updateOrder);
+        ChatStore.on("msgAcked", this.updateOrder);
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {

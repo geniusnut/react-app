@@ -138,6 +138,10 @@ class MessageStore extends EventEmitter {
         const m = {...message, state: StateEnum.STATE_ACK}
         chat.set(msgAck.getJetts(), m);
         CacheStore.saveMessage(message.msg.getConversationid(), key, m);
+        IMController.update({
+            '@type': 'msgAcked',
+            msg: m.msg,
+        })
     }
 
     get(chatId, messageId) {

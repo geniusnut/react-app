@@ -21,10 +21,12 @@ class DialogContent extends React.Component {
 
     componentDidMount() {
         ChatStore.on('tgtMsgSend', this.onUpdate);
+        ChatStore.on('msgAcked', this.onUpdate);
     }
 
     componentWillUnmount() {
         ChatStore.off('tgtMsgSend', this.onUpdate);
+        ChatStore.off('msgAcked', this.onUpdate);
     }
 
     onUpdate = update => {

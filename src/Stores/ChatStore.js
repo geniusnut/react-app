@@ -37,7 +37,8 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
-            case 'tgtMsgSend': {
+            case 'tgtMsgSend':
+            case 'msgAcked' :{
                 const msg = update.msg;
                 const lastTs = msg.getAckts() / 1000_000;
                 const chat = this.items.get(msg.getConversationid());
