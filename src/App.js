@@ -62,7 +62,8 @@ class App extends React.Component {
         let page = <MainPage />;
         if (authorizationState) {
             switch (authorizationState.auth_state) {
-                case AuthStateEnum.STATE_IDLE: {
+                case AuthStateEnum.STATE_IDLE:
+                case AuthStateEnum.STATE_FAILED: {
                     page = (
                         <AuthFormControl
                             authorizationState={authorizationState}

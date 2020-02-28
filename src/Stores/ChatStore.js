@@ -94,7 +94,9 @@ class ChatStore extends EventEmitter {
 
     getSortedItems() {
         return Array.from(new Map([...this.items.entries()]
-            .sort((a, b) => b[1].last_ts - a[1].last_ts))
+            .sort((a, b) => {
+                return b[1].last_ts - a[1].last_ts
+            }))
             .keys());
     }
 }

@@ -8,7 +8,7 @@ import LoginRedirect from "./Components/Auth/LoginRedirect";
 
 
 ReactDOM.render(
-    <Router>
+    <Router basename={process.env.PUBLIC_URL}>
         <Switch>
             <Route exact path="/" component={App}/>
             <Route path="/login/redirect/" component={LoginRedirect} />

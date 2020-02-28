@@ -1,6 +1,8 @@
 import {EventEmitter} from "events";
 import IMController from "../Controllers/IMController";
+import UserStore from './UserStore'
 import {KEY_AUTH_STATE} from "../Constants";
+import CacheStore from "./CacheStore";
 
 
 export const AuthStateEnum = Object.freeze({
@@ -30,7 +32,10 @@ class AuthorizationStore extends EventEmitter {
                 this.current = authorization_state;
                 console.log("authorization_state: ", authorization_state)
                 this.save(authorization_state);
-
+                const {uid, avatar, nick} = authorization_state;
+                const user = {cid: uid, uid, avatar, nick};
+                UserStore.set(user);
+                CacheStore.saveUser(user.cid, user);
                 this.emit(update['@type'], update);
                 break;
             }

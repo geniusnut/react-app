@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 import Button from '@material-ui/core/Button';
-import {AUTH_URL_TEST} from "../../Constants";
+import {AUTH_URL} from "../../Constants";
 import Logo from '../../Assets/logo.png';
 import './login.css';
 
@@ -11,7 +11,7 @@ class AuthFormControl extends React.Component {
     };
 
     scanQrCode() {
-        axios.post(AUTH_URL_TEST).then(data => {
+        axios.post(AUTH_URL).then(data => {
             console.log(data);
             window.location.href = data.data.data.auth_url
         }).catch(err => {

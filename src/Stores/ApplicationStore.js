@@ -17,9 +17,15 @@ class ApplicationStore extends EventEmitter {
         this.chatId = 0;
         this.dialogChatId = 0;
         this.messageId = 0;
+        this.isChatDetailsVisible = false;
 
         this.authorizationState = null;
     };
+
+    changeChatDetailsVisibility(visibility) {
+        this.isChatDetailsVisible = visibility;
+        this.emit('clientUpdateChatDetailsVisibility', visibility);
+    }
 
     getChatId() {
         return this.chatId;

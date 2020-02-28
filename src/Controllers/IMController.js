@@ -1,5 +1,5 @@
 import {EventEmitter} from "events";
-import {CLIENT_PROFILE_URL_TEST, WS_URL} from "../Constants";
+import {CLIENT_PROFILE_URL, WS_URL} from "../Constants";
 import axios from 'axios';
 var im_pb = require('../gen/im_pb');
 var conv_pb = require('../gen/conversation_pb');
@@ -195,7 +195,7 @@ class IMController extends EventEmitter {
 
         }
         console.log("IMController: ", new Error().stack);
-        axios.post(CLIENT_PROFILE_URL_TEST, 'cid='+cid, {
+        axios.post(CLIENT_PROFILE_URL, 'cid='+cid, {
             headers: headers
         }).then(data => {
             console.log(data);

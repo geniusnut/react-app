@@ -3,23 +3,38 @@ import classNames from 'classnames';
 import Dialogs from "./ColumnLeft/Dialogs";
 import ChatStore from '../Stores/ChatStore';
 import ApplicationStore from '../Stores/ApplicationStore';
-import DialogDetails from "./ColumnRight/DialogDetails";
+import DialogDetails from "./ColumnMiddle/DialogDetails";
 import IMController from '../Controllers/IMController';
+import ChatInfo from "./ColumnRight/ChatInfo";
 
 class MainPage extends React.Component {
     constructor(props) {
         super(props);
 
         this.dialogDetailsRef = React.createRef();
+
+        this.state = {
+            isChatDetailsVisible: ApplicationStore.isChatDetailsVisible,
+        };
     }
 
     componentDidMount() {
         ChatStore.on('clientUpdateOpenChat', this.onClientUpdateOpenChat);
+
+        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
     }
 
     componentWillUnmount() {
         ChatStore.off('clientUpdateOpenChat', this.onClientUpdateOpenChat);
+
+        ApplicationStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
     }
+
+    onClientUpdateChatDetailsVisibility = update => {
+        this.setState({
+            isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
+        });
+    };
 
     onClientUpdateOpenChat = update => {
         const { chatId, messageId, popup } = update;
@@ -45,12 +60,19 @@ class MainPage extends React.Component {
     };
 
     render() {
+        const {
+            isChatDetailsVisible,
+        } = this.state;
+
         return (
             <>
                 <div
-                    className={classNames('page')}>
+                    className={classNames('page', {
+                        'page-third-column': isChatDetailsVisible
+                    })}>
                     <Dialogs />
                     <DialogDetails ref={this.dialogDetailsRef} />
+                    {isChatDetailsVisible && <ChatInfo />}
                 </div>
             </>
         )
