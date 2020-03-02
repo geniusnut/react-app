@@ -2,6 +2,7 @@ import React from "react";
 import Dialog from "../Tile/Dialog";
 import ChatStore from "../../Stores/ChatStore"
 import './DialogsList.css';
+import {SCROLL_PRECISION} from "../../Constants";
 
 class DialogsList extends React.Component {
     constructor(props) {
@@ -28,8 +29,20 @@ class DialogsList extends React.Component {
         ChatStore.on("msgAcked", this.updateOrder);
     }
 
-    shouldComponentUpdate(nextProps, nextState, nextContext) {
-        return true
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+        const { current: list } = this.listRef;
+        if (!list) return { scrollTop: 0 };
+
+        return { scrollTop: list.scrollTop };
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { current: list } = this.listRef;
+        if (!list) return;
+
+        const { scrollTop } = snapshot;
+
+        list.scrollTop = scrollTop;
     }
 
     scrollToTop() {
@@ -37,13 +50,17 @@ class DialogsList extends React.Component {
         list.scrollTop = 0;
     }
 
-    handleScroll() {
+    handleScroll= () => {
+        const list = this.listRef.current;
 
+        if (list && list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
+            this.onLoadNext();
+        }
     }
 
     onQueryConv = update => {
-        const soretedItems = ChatStore.getSortedItems();
-        this.setState({chats: soretedItems}, () => this.onLoadNext(true));
+        const sortedItems = ChatStore.getSortedItems();
+        this.setState({chats: sortedItems}, () => this.onLoadNext(true));
     };
 
     render() {

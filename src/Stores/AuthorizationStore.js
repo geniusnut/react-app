@@ -45,6 +45,14 @@ class AuthorizationStore extends EventEmitter {
     };
 
     onClientUpdate = update => {
+        switch (update['@type']) {
+            case 'clientLogout': {
+                this.reset();
+                this.clear();
+                this.emit(update['@type'], update);
+                break;
+            }
+        }
     };
 
     addIMListener() {
@@ -78,6 +86,10 @@ class AuthorizationStore extends EventEmitter {
         } else {
             localStorage.removeItem(KEY_AUTH_STATE);
         }
+    }
+
+    clear() {
+        this.save();
     }
 }
 

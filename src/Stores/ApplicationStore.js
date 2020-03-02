@@ -82,6 +82,11 @@ class ApplicationStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientLogout': {
+                this.reset();
+                this.emit(update['@type'], update);
+                break
+            }
             default: {
                 break;
             }

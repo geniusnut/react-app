@@ -5,6 +5,8 @@ export const PHOTO_THUMBNAIL_SIZE = 90;
 export const PHOTO_DISPLAY_SIZE = 420;
 
 
+export const SCROLL_PRECISION = 200;
+
 export const ANIMATION_DURATION_100MS = 100;
 export const ANIMATION_DURATION_200MS = 200;
 export const ANIMATION_DURATION_300MS = 300;

@@ -28,6 +28,11 @@ class MainMenuButton extends React.Component {
     handleMenuClose = () => {
         this.setState({ anchorEl: null });
     };
+    handleLogOut = () => {
+        this.handleMenuClose();
+
+        this.props.onLogOut();
+    };
 
     render() {
         const { anchorEl } = this.state;
@@ -59,6 +64,7 @@ class MainMenuButton extends React.Component {
                         horizontal: 'right'
                     }}>
                     <MenuItem onClick={this.handleChatInfo}>{'ChatInfo'}</MenuItem>
+                    <MenuItem onClick={this.handleLogOut}>{'LogOut'}</MenuItem>
                 </Menu>
             </>
         );

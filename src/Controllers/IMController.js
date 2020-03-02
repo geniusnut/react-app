@@ -183,6 +183,13 @@ class IMController extends EventEmitter {
         this.clientUpdate(update)
     }
 
+    logout() {
+        this.ws.close();
+        this.clientUpdate({
+            '@type': "clientLogout",
+        })
+    }
+
     async getUser(uid, token, openId, cid) {
         if (this.userSet.has(cid)) {
             return

@@ -7,6 +7,7 @@
 
 import { formatNumber } from 'libphonenumber-js';
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
+import {AuthStateEnum} from "../Stores/AuthorizationStore";
 
 export function isMobile() {
     return isAndroid() || isIOS() || isWindowsPhone();
@@ -369,9 +370,10 @@ function arrayBufferToBase64(buffer) {
 }
 
 function isAuthorizationReady(state) {
+    console.log('isAuthorizationReady', state)
     if (!state) return false;
 
-    return state['@type'] === 'authorizationStateReady';
+    return state === AuthStateEnum.STATE_LOGIN;
 }
 
 function between(item, first, last, inclusive = false) {

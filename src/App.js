@@ -23,12 +23,14 @@ class App extends React.Component {
         IMController.addListener('update', this.onUpdate)
 
         AppStore.on('clientUpdateAuthState', this.onUpdateAuthorizationState);
+        AuthorizationStore.on('clientLogout', this.onLogout);
     }
 
     componentWillUnmount() {
         IMController.off('update', this.onUpdate)
 
         AppStore.off('clientUpdateAuthState', this.onUpdateAuthorizationState);
+        AuthorizationStore.off('clientLogout', this.onLogout);
     }
 
     onUpdateAuthorizationState = update => {
@@ -47,11 +49,20 @@ class App extends React.Component {
         console.log('update: ' +update['@type'])
     };
 
+    onLogout = update => {
+        this.state = {
+            prevAuthorizationState: null,
+            authorizationState: null
+        };
+        console.log('onLogout', AuthorizationStore.current)
+        this.forceUpdate();
+    };
+
     render() {
-        const {inactive} = this.state;
         let { authorizationState, prevAuthorizationState } = this.state;
+        console.log(authorizationState, prevAuthorizationState)
         if (!authorizationState) {
-            if (prevAuthorizationState) {
+            if (AuthorizationStore.current) {
                 authorizationState = prevAuthorizationState;
             } else {
                 authorizationState = {
