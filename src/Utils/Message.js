@@ -45,7 +45,7 @@ function getMedia(message, openMedia, chatId, messageId) {
                     type='message'
                     chatId={chatId}
                     messageId={messageId}
-                    src={image.getImgurl()}
+                    src={image.getLocalpath() || image.getImgurl()}
                     openMedia={openMedia}
                 />
             );

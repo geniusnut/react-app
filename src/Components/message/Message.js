@@ -24,7 +24,7 @@ import {
 } from '../../Actions/Client';
 import { getFitSize, getSize } from '../../Utils/Common';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../Constants';
-import MessageStore from '../../Stores/MessageStore';
+import MessageStore, {StateEnum} from '../../Stores/MessageStore';
 import AppStore from '../../Stores/ApplicationStore';
 import './Message.css';
 import Meta from "./Meta";
@@ -38,7 +38,8 @@ class Message extends Component {
         this.state = {
             message: MessageStore.get(chatId, messageId),
             selected: false,
-            highlighted: false
+            highlighted: false,
+            uploadProgress: 0,
         };
     }
 
@@ -112,6 +113,7 @@ class Message extends Component {
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.on('updateMessageEdited', this.onUpdateMessageEdited);
         MessageStore.on('updateMessageViews', this.onUpdateMessageViews);
+        MessageStore.on('updateMessageProgress', this.onUpdateMessageProgress);
     }
 
     componentWillUnmount() {
@@ -121,6 +123,7 @@ class Message extends Component {
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.off('updateMessageEdited', this.onUpdateMessageEdited);
         MessageStore.off('updateMessageViews', this.onUpdateMessageViews);
+        MessageStore.off('updateMessageProgress', this.onUpdateMessageProgress);
     }
 
     onClientUpdateClearSelection = update => {
@@ -173,6 +176,16 @@ class Message extends Component {
         const { chatId, messageId } = this.props;
 
         if (chatId === chat_id && messageId === message_id) {
+            this.forceUpdate();
+        }
+    };
+
+    onUpdateMessageProgress = update => {
+        const { chat_id, message_id } = update;
+        const { chatId, messageId } = this.props;
+
+        if (chatId === chat_id && messageId === message_id) {
+            this.state.uploadProgress = update.progress;
             this.forceUpdate();
         }
     };
@@ -333,7 +346,7 @@ class Message extends Component {
 
     render() {
         const { t, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
-        const { emojiMatches, selected, highlighted, contextMenu, left, top } = this.state;
+        const { emojiMatches, selected, highlighted, contextMenu, left, top, uploadProgress } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         console.log("Message: ", messageId, message)
@@ -357,6 +370,8 @@ class Message extends Component {
         const hasTitle = false; // showTitle || showForward || Boolean(reply_to_message_id);
         const media = getMedia(msg, this.openMedia, chatId, messageId);
 
+        const isSending = state === StateEnum.STATE_SEND;
+        const progress = isSending ? <Progress progress={uploadProgress}/> : null;
         let tile = <UserTile small userId={sender_user_id} onSelect={this.handleSelectUser} />;
         if (showTail) {
             tile = sender_user_id ? (
@@ -393,6 +408,7 @@ class Message extends Component {
                             })}
                             style={style}>
                             {media}
+                            {progress}
                             <div
                                 className={classNames('message-text')}>
                                 {text}

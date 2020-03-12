@@ -1,5 +1,5 @@
 import {EventEmitter} from "events";
-import {CLIENT_PROFILE_URL, WS_URL} from "../Constants";
+import {CLIENT_PROFILE_URL, CLIENT_UPLOAD_URL, WS_URL} from "../Constants";
 import axios from 'axios';
 var im_pb = require('../gen/im_pb');
 var conv_pb = require('../gen/conversation_pb');
@@ -214,6 +214,27 @@ class IMController extends EventEmitter {
         this.clientUpdate(update)
     }
 
+    sendImage(msg, content, conv) {
+        this.uploadImage(content, msg, url => {
+            const image = new msg_pb.Image();
+            image.setImgurl(url);
+            msg.setBlob(image.serializeBinary())
+
+            const request = new im_pb.IMRequest();
+            request.setConversation(conv);
+            request.setCid(this.state.cid);
+            request.setOperation(im_pb.IMOperation.CONVERSATIONMESSAGESEND);
+            request.setTs(Date.now());
+            request.setMsg(msg);
+            this.send(request);
+        })
+        const update = {
+            '@type': 'clientSendMessage',
+            msg: msg,
+        }
+        this.clientUpdate(update)
+    }
+
     logout() {
         this.ws.close();
         this.clientUpdate({
@@ -277,6 +298,44 @@ class IMController extends EventEmitter {
                 //Buffer.from(response.data, 'binary').toString('base64')
             }).catch(e => {
                 console.log('IMController downloadFile',e)
+        })
+    }
+
+    uploadImage = (content, msg, callback) => {
+        const convId = msg.getConversationid();
+        const msgId = msg.getJetts();
+
+        const formData = new FormData()
+        formData.append("name", content.photo.name)
+        formData.append("file", content.photo.data)
+        const headers = {
+            // 'uid': uid,
+            // 'token': token,
+            // 'openId': openId,
+            // 'Content-Type': "multipart/form-data",
+        };
+        axios.post(CLIENT_UPLOAD_URL, formData, {
+            headers: headers,
+            onUploadProgress: progressEvent => {
+                const totalLength = progressEvent.lengthComputable ? progressEvent.total : progressEvent.target.getResponseHeader('content-length')
+                    || progressEvent.target.getResponseHeader('x-decompressed-content-length');
+                console.log("onUploadProgress", totalLength, progressEvent);
+                let progressData = 0;
+                if (totalLength !== null) {
+                    progressData = Math.round( (progressEvent.loaded * 100) / totalLength );
+                }
+                this.clientUpdate({
+                    '@type': 'clientUpdateProgress',
+                    chat_id: convId,
+                    message_id: msgId,
+                    progress: progressData,
+                });
+            },
+        }).then(response => {
+            console.log("uploadImage", {response: response})
+            callback(response.data.data)
+        }).catch(e => {
+            console.log("uploadImage", e)
         })
     }
 }

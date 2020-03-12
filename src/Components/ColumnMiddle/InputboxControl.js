@@ -6,6 +6,7 @@ import SendIcon from '../../Assets/Icons/Send';
 import './InputBoxControl.css';
 import IMController from '../../Controllers/IMController';
 import AttachButton from "./AttachButton";
+import {readImageSize} from "../../Utils/Common";
 
 var msg_pb = require('../../gen/msg_pb');
 
@@ -15,6 +16,7 @@ class InputboxControl extends React.Component {
 
         this.attachDocumentRef = React.createRef();
         this.attachPhotoRef = React.createRef();
+        this.imageRef = React.createRef();
         this.newMessageRef = React.createRef();
 
         const chatId = AppStore.getChatId();
@@ -163,12 +165,79 @@ class InputboxControl extends React.Component {
 
     }
 
-    handleAttachPhotoComplete() {
+    handleAttachPhoto = () => {
+        if (!this.attachPhotoRef) return;
 
-    }
+        this.attachPhotoRef.current.click();
+    };
 
-    handlePaste() {
+    handleAttachPhotoComplete = () => {
+        const files = this.attachPhotoRef.current.files;
+        if (files.length === 0) return;
 
+        Array.from(files).forEach(file => {
+            // this.handleSendPhoto(file)
+            readImageSize(file, result => {
+                this.handleSendPhoto(result);
+            });
+        });
+
+        this.attachPhotoRef.current.value = '';
+    };
+
+    handleSendPhoto = file => {
+        if (!file) return;
+
+        const content = {
+            '@type': 'inputMessagePhoto',
+            photo: { '@type': 'inputFileBlob', name: file.name, data: file },
+            width: file.photoWidth,
+            height: file.photoHeight
+        };
+
+        // this.imageRef.current.src = file.blob // window.URL.createObjectURL(file)
+
+        const image = new msg_pb.Image();
+        image.setLocalpath(file.blob);
+        const msg = new msg_pb.Msg();
+        msg.setConversationid(this.state.chatId);
+        msg.setCid(AppStore.getCid());
+        msg.setType(msg_pb.MsgType.PICTURE);
+        msg.setJetts(Date.now());
+        msg.setBlob(image.serializeBinary())
+
+        const chat = ChatStore.get(this.state.chatId);
+        if (!chat) {
+            console.error("sendMessage failed!")
+            return;
+        }
+
+        IMController.sendImage(msg, content, chat.conv);
+    };
+
+    handlePaste = event => {
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+        const files = [];
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].kind.indexOf('file') === 0) {
+                files.push(items[i].getAsFile());
+            }
+        }
+
+        if (files.length > 0) {
+            event.preventDefault();
+
+            this.setState({ files });
+            return;
+        }
+
+        const plainText = event.clipboardData.getData('text/plain');
+        if (plainText) {
+            event.preventDefault();
+            document.execCommand('insertText', false, plainText);
+            return;
+        }
     }
 
     sendMessage = async (inputContent, b, f) => {

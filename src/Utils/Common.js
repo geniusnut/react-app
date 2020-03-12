@@ -310,6 +310,7 @@ function readImageSize(file, callback) {
             // `src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAA...........etc`
             // Blobs are usually faster and the image src will hold a shorter blob name
             // src="blob:http%3A//example.com/2a303acf-c34c-4d0a-85d4-2136eef7d723"
+            file.blob = reader.result
             if (useBlob) {
                 // Free some memory for optimal performance
                 window.URL.revokeObjectURL(image.src);
@@ -319,6 +320,7 @@ function readImageSize(file, callback) {
         });
 
         image.src = useBlob ? window.URL.createObjectURL(file) : reader.result;
+        console.log("image.src: ", reader.result)
     });
 
     // https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
