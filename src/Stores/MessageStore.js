@@ -11,7 +11,7 @@ export const StateEnum = Object.freeze({
 });
 
 export function isOutgoing(state) {
-    return state === StateEnum.STATE_SEND || state === StateEnum.STATE_ACK;
+    return state === StateEnum.STATE_SEND || state === StateEnum.STATE_ACK || state === StateEnum.STATE_READ;
 }
 
 class MessageStore extends EventEmitter {
@@ -26,6 +26,7 @@ class MessageStore extends EventEmitter {
 
     reset = () => {
         this.items = new Map();
+        this.unread = new Map();
         this.loaded = new Set();
     };
 
@@ -39,21 +40,39 @@ class MessageStore extends EventEmitter {
             case 'tgtMsgSend': {
                 const msg = update.msg;
                 this.set(msg);
+                this.addUnreadMsg(msg);
                 this.emit("tgtMsgSend", update);
                 break;
             }
             case 'msgAck': {
                 const msgAck = update.msgAck;
                 this.updateLocal(msgAck);
-                this.emit("msgAck", update);
+                this.emit("msgAck", {
+                    msgId: msgAck.getId(),
+                    chatId: msgAck.getConversationid(),
+                });
                 break;
             }
             case 'msgRead': {
                 const msgRead = update.msgRead;
                 this.updateRead(msgRead);
-                this.emit("msgRead", update);
+                this.clearUnread(msgRead);
+                this.emit("msgRead", {
+                    msgId: msgRead.getId(),
+                    chatId: msgRead.getConversationid(),
+                });
                 break;
-            }}
+            }
+            case 'msgHasRead': {
+                const msgRead = update.msgRead;
+                this.updateReadLocal(msgRead);
+                this.emit("msgHasRead", {
+                    msgId: msgRead.getId(),
+                    chatId: msgRead.getConversationid(),
+                });
+                break;
+            }
+        }
     };
 
     onClientUpdate = update => {
@@ -90,20 +109,46 @@ class MessageStore extends EventEmitter {
 
     setLocal(message) {
         if (!message) return;
+        const chatId = message.getConversationid();
 
-        let chat = this.items.get(message.getConversationid());
+        let chat = this.items.get(chatId);
         if (!chat) {
             chat = new Map();
-            this.items.set(message.getConversationid(), chat);
+            this.items.set(chatId, chat);
         }
         const m = {state: StateEnum.STATE_SEND, msg: message, ts: message.getJetts()};
         chat.set(message.getJetts(), m);
-        CacheStore.saveMessage(message.getConversationid(), message.getJetts(), m);
+        CacheStore.saveMessage(chatId, message.getJetts(), m);
+    }
+
+    updateReadLocal(msgRead) {
+        if (!msgRead) return;
+        const [chatId, msgId] = [msgRead.getConversationid(), msgRead.getId()];
+        let chat = this.items.get(chatId);
+        if (!chat) {
+            return;
+        }
+        console.log("updateReadLocal", chatId, msgId)
+        for (let message of chat.values()) {
+            if (message.msg && message.msg.getId() === msgId) {
+                console.log("updateReadLocal message.msg.getId", message.msg.getId())
+
+                const m = {...message, state: StateEnum.STATE_READ}
+                chat.set(message.msg.getJetts(), m)
+                CacheStore.saveMessage(chatId, message.msg.getJetts(), m);
+                return
+            }
+        }
+        // chat.values.forEach(message => {
+        //     if (!message.msg && message.msg.getId() !== msgId) return;
+        //     message.state = StateEnum.STATE_READ;
+        // })
     }
 
     updateRead(msgRead) {
         if (!msgRead) return;
-        let chat = this.items.get(msgRead.getConversationid());
+        const [chatId] = msgRead.getConversationid();
+        let chat = this.items.get(chatId);
         if (!chat) {
             return;
         }
@@ -116,7 +161,7 @@ class MessageStore extends EventEmitter {
 
         const m = {...message, state: StateEnum.STATE_READ}
         chat.set(key, m);
-        CacheStore.saveMessage(message.msg.getConversationid(), key, m);
+        CacheStore.saveMessage(chatId, key, m);
     }
 
     updateLocal(msgAck) {
@@ -184,6 +229,38 @@ class MessageStore extends EventEmitter {
         }
         // chat.values.
         return Array.from(chat.values()).sort((a,b) => ((a.ts > b.ts) ? 1 : -1));
+    }
+
+    addUnreadMsg(msg) {
+        if (!msg) return;
+        const [convId, msgId] = [msg.getConversationid(), msg.getId()];
+        if (!convId) return;
+        if (!this.unread.has(convId)) {
+            this.unread.set(convId, new Set());
+        }
+
+        this.unread.get(convId).add(msgId)
+    }
+
+    clearUnread(msgRead) {
+        if (!msgRead) return;
+        const [convId, msgId] = [msgRead.getConversationid(), msgRead.getId()];
+        if (!convId) return;
+        if (!this.unread.has(convId)) return;
+        this.unread.get(convId).delete(msgId);
+    }
+
+    getUnreadByChatId(chatId) {
+        let s = this.unread.get(chatId)
+        return s ? s.size : 0;
+    }
+
+    getUnread() {
+        let s = 0;
+        [...this.unread.values()].forEach(item => {
+            s += item.size
+        })
+        return s;
     }
 }
 

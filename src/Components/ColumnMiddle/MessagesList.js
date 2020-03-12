@@ -187,14 +187,16 @@ class MessagesList extends React.Component {
             return true;
         }
 
-        const date = new Date(message.getAckts() / 1000_000);
-        const prevDate = prevMessage ? new Date(prevMessage.getAckts() / 1000_000) : date;
+        const [ackTs, jetTs] = [message.getAckts(), message.getJetts()]
+        const date = ackTs ? new Date(ackTs / 1000_000) : new Date(jetTs);
+        const prevDate = prevMessage ? (new Date(prevMessage.getAckts() ? prevMessage.getAckts() / 1000_000: prevMessage.getJetts())): date;
 
         if (
             date.getFullYear() !== prevDate.getFullYear() ||
             date.getMonth() !== prevDate.getMonth() ||
             date.getDate() !== prevDate.getDate()
         ) {
+            console.log("message:", message, 'prevMessage', prevMessage);
             return true;
         }
 

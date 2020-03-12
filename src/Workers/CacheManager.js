@@ -157,7 +157,8 @@ class CacheManager {
     }
 
     async clear() {
-        await clear();
+        await clear(this.userStore);
+        await clear(this.chatStore);
 
         //const store = localforage.createInstance({ name: 'telegram' });
         //store.clear();

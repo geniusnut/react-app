@@ -9,7 +9,24 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
 import './ChatInfo.css';
+import CloseIcon from '@material-ui/icons/Close';
+import {getChatTitle, isSingleChat} from "../../Utils/Chat";
+import IconButton from "@material-ui/core/IconButton";
+import withStyles from "@material-ui/core/styles/withStyles";
+import {compose} from "recompose";
+import ChatTile from "../Tile/ChatTile";
+import ChatDetails from "./ChatDetails";
+
+const styles = {
+    leftIconButton: {
+        margin: '8px -2px 8px 12px'
+    },
+    rightIconButton: {
+        margin: '8px 12px 8px -2px'
+    }
+};
 
 class ChatInfo extends React.Component {
     constructor(props) {
@@ -32,10 +49,12 @@ class ChatInfo extends React.Component {
         this.loadContent(this.state.chatId);
 
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        ChatStore.on('groupInfo', this.onGroupInfo);
     }
 
     componentWillUnmount() {
         ApplicationStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        ChatStore.off('groupInfo', this.onGroupInfo);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -60,6 +79,13 @@ class ChatInfo extends React.Component {
         });
     };
 
+    onGroupInfo = update => {
+        const {conv} = update;
+        const {chatId} = this.state;
+        if (!conv && conv.getId() !== chatId) return;
+        this.forceUpdate();
+    }
+
     handleCloseChatDetails = () => {
         const { popup } = this.props;
         const { userChatId } = this.state;
@@ -77,16 +103,21 @@ class ChatInfo extends React.Component {
             chatId,
         } = this.state;
 
-        let content = null;
-
-        let title = 'Chat Info'
+        const chat = ChatStore.get(chatId);
+        const {type, conv, id} = chat;
+        let title = getChatTitle(chatId);
+        let info = type === 0 ? 'Info' : 'Group Info';
+        const big = true;
+        const content = (
+            <ChatDetails
+                chatId={chatId}
+                popup={popup}
+                onClose={this.handleCloseChatDetails}
+            />
+        )
         return  (
             <div className={classNames('chat-info', { 'right-column': !popup }, className)}>
-                <div className='header-master'>
-                    <div className='header-status grow cursor-pointer' onClick={this.handleCloseChatDetails}>
-                        <span className='header-status-content'>{title}</span>
-                    </div>
-                </div>
+                {content}
             </div>
         );
     }
@@ -104,4 +135,8 @@ ChatInfo.defaultProps = {
     popup: false
 };
 
-export default ChatInfo;
+const enhance = compose(
+    withStyles(styles, { withTheme: true })
+);
+
+export default enhance(ChatInfo);

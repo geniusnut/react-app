@@ -14,7 +14,7 @@ class ApplicationStore extends EventEmitter {
     reset = () => {
         this.cacheLoaded = false;
         this.cid = null;
-        this.chatId = 0;
+        this.chatId = null;
         this.dialogChatId = 0;
         this.messageId = 0;
         this.isChatDetailsVisible = false;
@@ -84,6 +84,10 @@ class ApplicationStore extends EventEmitter {
             }
             case 'clientLogout': {
                 this.reset();
+                this.emit(update['@type'], update);
+                break
+            }
+            case 'imState': {
                 this.emit(update['@type'], update);
                 break
             }

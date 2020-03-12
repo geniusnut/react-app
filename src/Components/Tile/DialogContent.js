@@ -43,7 +43,7 @@ class DialogContent extends React.Component {
         const chat = ChatStore.get(chatId);
 
         const content = getLastMessageContent(chat, t) || '\u00A0';
-        const senderName = isSingleChat(chat) ? null : getLastMessageSenderName(chat);
+        const senderName = isSingleChat(chatId) ? null : getLastMessageSenderName(chat);
 
         return <div className='dialog-content'>
             {/*{senderName && <span className='dialog-content-accent'>{senderName}: </span>}*/}

@@ -58,7 +58,13 @@ class CacheStore extends EventEmitter {
     };
 
     onClientUpdate = update => {
-
+        switch (update['@type']) {
+            case 'clientLogout': {
+                this.reset();
+                this.clear();
+                break
+            }
+        }
     };
 
     async loadCache() {
@@ -80,6 +86,10 @@ class CacheStore extends EventEmitter {
             FileStore.setDataUrl(index, x);
         });
         return users;
+    }
+
+    async clear() {
+        CacheManager.clear()
     }
 
     getCache(chatIds) {

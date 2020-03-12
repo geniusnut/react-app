@@ -1,4 +1,5 @@
 import React from "react";
+import classNames from 'classnames';
 import MessagesList from "./MessagesList";
 import AppStore from '../../Stores/ApplicationStore';
 import Header from './Header';
@@ -34,11 +35,17 @@ class DialogDetails extends React.Component {
 
     componentDidMount() {
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
     }
 
     componentWillUnmount() {
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
     }
+
+    onUpdateChatDetailsVisibility = update => {
+        this.forceUpdate();
+    };
 
     async loadCache() {
         const cache = (await CacheStore.loadMessages(this.state.chatId)) || {};
@@ -70,10 +77,10 @@ class DialogDetails extends React.Component {
     render() {
         this.loadCache();
         const { chatId, messageId, selectedCount } = this.state;
+        const { isChatDetailsVisible } = AppStore;
 
         return (
-            <div
-                className={'dialog-details'}>
+            <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
                 <Header chatId={chatId} />
                 <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
                 <InputboxControl />

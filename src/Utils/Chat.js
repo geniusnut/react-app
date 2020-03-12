@@ -2,21 +2,43 @@
 import dateFormat from 'dateformat';
 import ChatStore from '../Stores/ChatStore';
 import {getContent} from "./Message";
-import {getPeerUser} from "./User";
+import {getPeerUser, getUser} from "./User";
 
-function isSingleChat(chat) {
-    return !chat && chat.getType() === 0;
+function isSingleChat(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+    if (!chat.type) return false;
+    return chat.type === 0;
+}
+
+function isGroupChat(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+    if (!chat.type) return false;
+    return chat.type === 1;
 }
 
 function getChatTitle(chatId, showSavedMessages = false, t = key => key) {
     const chat = ChatStore.get(chatId);
     if (!chat || !chat.conv) return null;
     if (chat.conv.getType() === 1) {
-        return chat.conv.getName() || '未命名'
+        return chat.conv.getName() || getGroupNoName(chat.conv)
     }
     const user = getPeerUser(chat.conv)
     if (!user) return null;
     return user.nick;
+}
+
+function getGroupNoName(conv) {
+    let name = ""
+    conv.getCidsList().forEach(cid => {
+        let user = getUser(cid)
+        if (user && user.nick) {
+            name += user.nick + ','
+        }
+    })
+
+    return (name && name.slice(0, -1))|| '未命名'
 }
 
 function getMessageDate(message) {
@@ -69,6 +91,7 @@ function getLastMessageContent(chat, t = key => key) {
 
 export {
     isSingleChat,
+    isGroupChat,
     getChatTitle,
     getLastMessageDate,
     getLastMessageSenderName,

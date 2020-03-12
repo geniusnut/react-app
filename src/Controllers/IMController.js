@@ -25,10 +25,13 @@ class IMController extends EventEmitter {
     init = (cid) => {
         console.log("IMController init")
         this.ws = new WebSocket(WS_URL);
-        this.state.cid = cid
+        this.state.cid = cid;
         this.ws.binaryType = 'arraybuffer';
         this.ws.onopen = () => {
             console.log("onopen");
+            this.emit('update', {
+                '@type': 'imState',
+            })
             this.login();
         };
 
@@ -41,8 +44,12 @@ class IMController extends EventEmitter {
         };
 
         this.ws.onclose = () => {
-            console.log('disconnected');
+            console.log('disconnected', Date.now());
+            this.emit('update', {
+                '@type': 'imState',
+            })
         };
+
         this.ws.onerror = ev => {
         }
     };
@@ -94,7 +101,31 @@ class IMController extends EventEmitter {
 
                 break;
             }
+            case im_pb.IMOperation.TARGETMESSAGEREAD: {
+                const msgRead = msg_pb.MsgRead.deserializeBinary(response.getBlob())
+                // console.log("TARGETMESSAGEREAD, ", msgRead);
+                this.emit("update", {
+                    '@type': 'msgHasRead',
+                    msgRead: msgRead,
+                });
+
+                break
+            }
+            case im_pb.IMOperation.CONVERSATIONGROUPINFO: {
+                const conv = msg_pb.Conversation.deserializeBinary(response.getBlob())
+                console.log("CONVERSATIONGROUPINFO, ", conv);
+                this.emit("update", {
+                    '@type': 'groupInfo',
+                    conv: conv,
+                });
+
+                break;
+            }
         }
+    }
+
+    getImState() {
+        return this.ws ? false : this.ws.readyState === this.ws.OPEN;
     }
 
     ackResponse = (op, ts = 0) => {
@@ -188,6 +219,16 @@ class IMController extends EventEmitter {
         this.clientUpdate({
             '@type': "clientLogout",
         })
+    }
+
+    queryGroup(convId) {
+        const request = new im_pb.IMRequest();
+        const conv = new conv_pb.Conversation();
+        conv.setId(convId);
+        conv.setVersion(0);
+        request.setConversation(conv);
+        request.setOperation(im_pb.IMOperation.CONVERSATIONGROUPINFO);
+        this.send(request);
     }
 
     async getUser(uid, token, openId, cid) {

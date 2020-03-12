@@ -27,6 +27,8 @@ import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import AppStore from '../../Stores/ApplicationStore';
 import './Message.css';
+import Meta from "./Meta";
+import Progress from "./Progress";
 
 class Message extends Component {
     constructor(props) {
@@ -192,7 +194,6 @@ class Message extends Component {
     };
 
     handleSelectUser = userId => {
-        openUser(userId, true);
     };
 
     handleSelectChat = chatId => {
@@ -335,23 +336,23 @@ class Message extends Component {
         const { emojiMatches, selected, highlighted, contextMenu, left, top } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
+        console.log("Message: ", messageId, message)
         if (!message) return <div>[empty message]</div>;
         const {state, msg} = message;
 
         const sender_user_id = message.msg.getCid();
         const is_outgoing = sender_user_id === AppStore.getCid();
+        const date = msg.getAckts() ? new Date(msg.getAckts() / 1000_000) : msg.getJetts() / 1000;
 
-        // const inlineMeta = (
-        //     <Meta
-        //         className='meta-hidden'
-        //         chatId={chatId}
-        //         messageId={messageId}
-        //         date={date}
-        //         editDate={edit_date}
-        //         views={views}
-        //     />
-        // );
-        const text = getText(msg);
+        const inlineMeta = (
+            <Meta
+                className='meta-hidden'
+                chatId={chatId}
+                messageId={messageId}
+                date={date}
+            />
+        );
+        const text = getText(msg, inlineMeta);
         const hasCaption = false; // text !== null && text.length > 0;
         const hasTitle = false; // showTitle || showForward || Boolean(reply_to_message_id);
         const media = getMedia(msg, this.openMedia, chatId, messageId);
@@ -396,6 +397,15 @@ class Message extends Component {
                                 className={classNames('message-text')}>
                                 {text}
                             </div>
+
+                            <Meta
+                                className={classNames('meta-text', {
+                                    'meta-bubble': false,
+                                })}
+                                chatId={chatId}
+                                messageId={messageId}
+                                date={date}
+                            />
                         </div>
                         <div className='message-tile-padding' />
                     </div>

@@ -5,6 +5,7 @@ import IMController from "./Controllers/IMController";
 import AppStore from './Stores/ApplicationStore';
 import AuthorizationStore, {AuthStateEnum} from './Stores/AuthorizationStore';
 import AuthFormControl from "./Components/Auth/AuthFormControl";
+import NotificationStore from './Stores/NotificationStore';
 
 class App extends React.Component {
     constructor(props) {
@@ -34,14 +35,10 @@ class App extends React.Component {
     }
 
     onUpdateAuthorizationState = update => {
-        // const { state: authorizationState } = update;
-        //
-        // this.setState({ authorizationState });
-        //
-        // if (!window.hasFocus) return;
-        // if (!authorizationState) return;
-
+        if (!window.hasFocus) return;
         console.log("onUpdateAuthorizationState")
+        const cid = AppStore.getCid();
+        if (!cid) return;
         IMController.init(AppStore.getCid())
     };
 
@@ -101,5 +98,31 @@ class App extends React.Component {
         );
     };
 }
+
+window.hasFocus = true;
+
+window.onblur = function() {
+    // keyMap.clear();
+
+    console.log("onFocus false");
+    window.hasFocus = false;
+
+    IMController.clientUpdate({
+        '@type': 'clientUpdateFocusWindow',
+        focused: false
+    });
+};
+
+window.onfocus = function() {
+    // keyMap.clear();
+    console.log("onFocus true");
+    window.hasFocus = true;
+
+    IMController.clientUpdate({
+        '@type': 'clientUpdateFocusWindow',
+        focused: true
+    });
+};
+
 
 export default App;

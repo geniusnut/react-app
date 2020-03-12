@@ -59,7 +59,7 @@ class ChatTile extends React.Component {
     };
 
     render() {
-        const { chatId } = this.props;
+        const { chatId, big } = this.props;
         const { loaded } = this.state;
 
         const chat = ChatStore.get(chatId);
@@ -72,7 +72,8 @@ class ChatTile extends React.Component {
         return (
             <div
                 className={classNames('chat-tile',
-                    { [tileColor]: !tileLoaded }
+                    { [tileColor]: !tileLoaded },
+                    { 'tile-big': big },
                 )}>
                 {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
             </div>

@@ -47,11 +47,18 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
+            case 'groupInfo': {
+                const {conv} = update;
+                this.updateGroup(conv);
+                this.emitUpdate(update);
+                break;
+            }
         }
     };
 
     assign(source1, source2) {
         //Object.assign(source1, source2);
+        if (!source1) return;
         const chat = Object.assign({}, source1, source2);
         this.set(chat);
         CacheStore.saveChat(chat.id, chat);
@@ -74,11 +81,23 @@ class ChatStore extends EventEmitter {
         this.assign(chat, {conv:conv})
     }
 
+    updateGroup(conv) {
+        let chat = this.items.get(conv.getId());
+        if (!chat && chat !== conv) {
+            console.log('ChatStore new conv: ', conv);
+            this.assign(chat, {conv:conv})
+        }
+    }
+
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateOpenChat': {
                 this.emitUpdate(update);
                 break;
+            }
+            case 'clientLogout': {
+                this.reset();
+                break
             }
         }
     };
@@ -98,6 +117,15 @@ class ChatStore extends EventEmitter {
                 return b[1].last_ts - a[1].last_ts
             }))
             .keys());
+    }
+
+    findUserChat(userId) {
+        const chat =  Array.from(this.items.values()).find(item => {
+            return item.conv && item.conv.getType() === 0 &&
+                item.conv.getCidsList().includes(userId)
+        });
+        console.log("openUser: ", chat);
+        return chat.id
     }
 }
 

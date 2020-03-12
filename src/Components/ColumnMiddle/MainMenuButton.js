@@ -64,7 +64,6 @@ class MainMenuButton extends React.Component {
                         horizontal: 'right'
                     }}>
                     <MenuItem onClick={this.handleChatInfo}>{'ChatInfo'}</MenuItem>
-                    <MenuItem onClick={this.handleLogOut}>{'LogOut'}</MenuItem>
                 </Menu>
             </>
         );

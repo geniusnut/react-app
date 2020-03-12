@@ -183,6 +183,7 @@ class InputboxControl extends React.Component {
         const chat = ChatStore.get(this.state.chatId);
         if (!chat) {
             console.error("sendMessage failed!")
+            return;
         }
 
         IMController.sendMsg(msg, chat.conv);
