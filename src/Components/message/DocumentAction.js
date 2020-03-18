@@ -1,0 +1,116 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import withStyles from '@material-ui/core/styles/withStyles';
+import FileStore from '../../Stores/FileStore';
+import './DocumentAction.css';
+import {getSizeString} from "../../Utils/File";
+
+const styles = theme => ({
+    documentAction: {
+        color: theme.palette.text.secondary
+    }
+});
+
+class DocumentAction extends React.Component {
+    constructor(props) {
+        super(props);
+
+        const { file } = this.props;
+        this.state = {
+            prevPropsFile: file,
+            prevFile: null,
+            // file: FileStore.get(file.id) || file
+        };
+    }
+
+    componentDidMount() {
+        FileStore.on('updateFile', this.onUpdateFile);
+    }
+
+    componentWillUnmount() {
+        FileStore.off('updateFile', this.onUpdateFile);
+    }
+
+    onUpdateFile = update => {
+        const currentFile = this.state.file;
+        const nextFile = update.file;
+
+        if (currentFile && currentFile.id === nextFile.id) {
+            this.setState({ file: nextFile, prevFile: currentFile });
+        }
+    };
+
+    static getDerivedStateFromProps(props, state) {
+        const { file } = props;
+        const { prevPropsFile } = state;
+
+        if (file && prevPropsFile && file.id !== prevPropsFile.id) {
+            return {
+                prevPropsFile: file,
+                prevFile: null,
+                file: FileStore.get(file.id) || file
+            };
+        }
+
+        return null;
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        const { theme } = this.props;
+        const { file, prevFile } = this.state;
+
+        if (nextProps.theme !== theme) {
+            return true;
+        }
+
+        if (nextState.file !== file) {
+            return true;
+        }
+
+        if (nextState.prevFile !== prevFile) {
+            return true;
+        }
+
+        return false;
+    }
+
+    render() {
+        const { classes, meta, file } = this.props;
+        if (!file) return null;
+
+        const isDownloadingActive = file.local && file.local.is_downloading_active;
+        const isUploadingActive = file.remote && file.remote.is_uploading_active;
+
+        const size = getSizeString(file.size)
+        let progressSize = null;
+        // if (isDownloadingActive) {
+        //     progressSize = getDownloadedSize(file);
+        // } else if (isUploadingActive) {
+        //     progressSize = getUploadedSize(file);
+        // }
+
+        console.log("document file:", file)
+        const sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
+
+        return (
+            <div className={classNames('document-action', classes.documentAction)}>
+                <span>{sizeString}</span>
+                {meta}
+            </div>
+        );
+    }
+}
+
+DocumentAction.propTypes = {
+    file: PropTypes.object.isRequired
+};
+
+export default withStyles(styles, { withTheme: true })(DocumentAction);

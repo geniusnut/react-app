@@ -29,6 +29,7 @@ import AppStore from '../../Stores/ApplicationStore';
 import './Message.css';
 import Meta from "./Meta";
 import Progress from "./Progress";
+import Document from "./Document";
 
 class Message extends Component {
     constructor(props) {
@@ -369,7 +370,6 @@ class Message extends Component {
         const hasCaption = false; // text !== null && text.length > 0;
         const hasTitle = false; // showTitle || showForward || Boolean(reply_to_message_id);
         const media = getMedia(msg, this.openMedia, chatId, messageId);
-
         const isSending = state === StateEnum.STATE_SEND;
         const progress = isSending ? <Progress progress={uploadProgress}/> : null;
         let tile = <UserTile small userId={sender_user_id} onSelect={this.handleSelectUser} />;

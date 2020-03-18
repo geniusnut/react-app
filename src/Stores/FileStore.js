@@ -54,7 +54,10 @@ class FileStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
-
+            case 'clientUpdateProgress': {
+                this.emit(update['@type'], update)
+                break
+            }
         }
     };
 

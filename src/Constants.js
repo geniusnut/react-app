@@ -20,6 +20,6 @@ const BASE_URL = process.env.NODE_ENV === "production" ? BASE_URL_PRODUCTION : B
 export const AUTH_URL = BASE_URL + "/api/third/im/auth";
 export const AUTH_INFO_URL = BASE_URL + "/api/third/im/authInfo";
 export const CLIENT_PROFILE_URL = BASE_URL + "/api/im/userProfile";
-export const CLIENT_UPLOAD_URL = BASE_URL + "/api/upload";
+export const CLIENT_UPLOAD_URL = BASE_URL + "/aapi/upload";
 
 export const KEY_AUTH_STATE = 'auth';

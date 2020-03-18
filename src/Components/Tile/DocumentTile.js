@@ -1,0 +1,105 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+// import FileProgress from '../../Components/Viewer/FileProgress';
+import { getSrc } from '../../Utils/File';
+import FileStore from '../../Stores/FileStore';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import './DocumentTile.css';
+import FileProgress from "../Viewer/FileProgress";
+
+class DocumentTile extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            loaded: false
+        };
+    }
+
+    componentDidMount() {
+        FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.on('clientUpdateAudioThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.on('', this.onClientUpdateProgress)
+    }
+
+    componentWillUnmount() {
+        FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.off('clientUpdateAudioThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+    }
+
+    onClientUpdateDocumentThumbnailBlob = update => {
+        const { thumbnail } = this.props;
+        if (!thumbnail) return;
+
+        const file = thumbnail.photo;
+        if (!file) return;
+
+        const { fileId } = update;
+
+        if (file.id !== fileId) {
+            return;
+        }
+
+        this.forceUpdate();
+    };
+
+    onClientUpdateProgress = update => {
+
+    }
+
+    handleLoad = () => {
+        this.setState({ loaded: true });
+    };
+
+    render() {
+        const { minithumbnail, thumbnail, file, icon, completeIcon, openMedia, chatId, messageId } = this.props;
+        const { loaded } = this.state;
+
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const tileLoaded = thumbnailSrc && loaded;
+        const src = thumbnailSrc || miniSrc;
+
+        return (
+            <div
+                className={classNames('document-tile', { 'document-tile-image': !src }, { pointer: openMedia })}
+                onClick={openMedia}>
+                {!tileLoaded && <div className='document-tile-background' />}
+                {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
+                {file && (
+                    <FileProgress
+                        file={file}
+                        thumbnailSrc={src}
+                        chatId={chatId}
+                        messageId={messageId}
+                        upload
+                        cancelButton
+                        zIndex={1}
+                        icon={icon}
+                        completeIcon={completeIcon}
+                    />
+                )}
+
+            </div>
+        );
+    }
+}
+
+DocumentTile.propTypes = {
+    minithumbnail: PropTypes.object,
+    thumbnail: PropTypes.object,
+    file: PropTypes.object,
+    openMedia: PropTypes.func,
+    icon: PropTypes.node,
+    completeIcon: PropTypes.node
+};
+
+export default DocumentTile;

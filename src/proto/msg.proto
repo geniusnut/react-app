@@ -12,6 +12,7 @@ enum MsgType {
     Voice = 2;
     Redpacket = 3;
     Auxiliary = 4; // not
+    File = 5;
 }
 
 message Msg {
@@ -55,4 +56,13 @@ message Image {
 message AuxiliaryMsg {
     AuxiliaryType type = 1;
     bytes blob = 2;
+}
+
+message FileBean {
+    string localPath = 1;
+    string name = 2;
+    string url = 3;
+    string mediaType = 4;
+    string md5 = 5;
+    int64 size = 6;
 }

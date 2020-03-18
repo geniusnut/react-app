@@ -3,6 +3,7 @@ import dateFormat from 'dateformat';
 import IMController from '../Controllers/IMController';
 import MessageStore, {StateEnum} from '../Stores/MessageStore';
 import Photo from "../Components/message/Photo";
+import Document from "../Components/message/Document";
 var msg_pb = require('../gen/msg_pb');
 
 export function readMessages(chatId, messageIds, forceRead) {
@@ -49,6 +50,22 @@ function getMedia(message, openMedia, chatId, messageId) {
                     openMedia={openMedia}
                 />
             );
+        }
+        case msg_pb.MsgType.FILE: {
+            const fileBean = msg_pb.FileBean.deserializeBinary(message.getBlob())
+            console.log("getMedia", {fileBean: fileBean})
+            const document = {
+                md5:fileBean.getMd5(),
+                name:fileBean.getName(),
+                url:fileBean.getUrl(), size: fileBean.getSize()}
+            return (
+                <Document
+                    title={fileBean.getName()}
+                    chatId={chatId}
+                    messageId={messageId}
+                    document={document}
+                />
+            )
         }
     }
     return null;

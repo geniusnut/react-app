@@ -214,8 +214,29 @@ class IMController extends EventEmitter {
         this.clientUpdate(update)
     }
 
-    sendImage(msg, content, conv) {
-        this.uploadImage(content, msg, url => {
+    sendFile(msg, content, name, conv) {
+        this.uploadImage(content, name,msg, url => {
+            const fileBean = msg_pb.FileBean.deserializeBinary(msg.getBlob());
+            fileBean.setUrl(url);
+            msg.setBlob(fileBean.serializeBinary())
+
+            const request = new im_pb.IMRequest();
+            request.setConversation(conv);
+            request.setCid(this.state.cid);
+            request.setOperation(im_pb.IMOperation.CONVERSATIONMESSAGESEND);
+            request.setTs(Date.now());
+            request.setMsg(msg);
+            this.send(request);
+        });
+        const update = {
+            '@type': 'clientSendMessage',
+            msg: msg,
+        };
+        this.clientUpdate(update)
+    }
+
+    sendImage(msg, content, name, conv) {
+        this.uploadImage(content, name, msg, url => {
             const image = new msg_pb.Image();
             image.setImgurl(url);
             msg.setBlob(image.serializeBinary())
@@ -301,13 +322,13 @@ class IMController extends EventEmitter {
         })
     }
 
-    uploadImage = (content, msg, callback) => {
+    uploadImage = (content, name, msg, callback) => {
         const convId = msg.getConversationid();
         const msgId = msg.getJetts();
 
         const formData = new FormData()
-        formData.append("name", content.photo.name)
-        formData.append("file", content.photo.data)
+        formData.append("name", name)
+        formData.append("file", content)
         const headers = {
             // 'uid': uid,
             // 'token': token,

@@ -26,8 +26,40 @@ function getAvatar(url) {
 function getRemoteFile(url) {
 }
 
+function getExtension(fileName) {
+    if (!fileName) {
+        return '';
+    }
+
+    const parts = fileName.split('.');
+    if (parts.length === 1 || (parts[0] === '' && parts.length === 2)) {
+        return '';
+    }
+    return parts.pop().toLowerCase();
+}
+
+function getSizeString(size) {
+    if (!size) return `0 B`;
+
+    if (size < 1024) {
+        return `${size} B`;
+    }
+
+    if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(1)} KB`;
+    }
+
+    if (size < 1024 * 1024 * 1024) {
+        return `${(size / 1024 / 1024).toFixed(1)} MB`;
+    }
+
+    return `${(size / 1024 / 1024 / 1024).toFixed(1)} GB`;
+}
+
 export {
     getBlob,
     getSrc,
     getRemoteFile,
+    getExtension,
+    getSizeString,
 }

@@ -161,9 +161,22 @@ class InputboxControl extends React.Component {
 
     }
 
-    handleAttachDocumentComplete() {
+    handleAttachDocument = () => {
+        if (!this.attachDocumentRef) return;
 
-    }
+        this.attachDocumentRef.current.click();
+    };
+
+    handleAttachDocumentComplete = () => {
+        const files = this.attachDocumentRef.current.files;
+        if (files.length === 0) return;
+
+        Array.from(files).forEach(file => {
+            this.handleSendDocument(file);
+        });
+
+        this.attachDocumentRef.current.value = '';
+    };
 
     handleAttachPhoto = () => {
         if (!this.attachPhotoRef) return;
@@ -212,7 +225,7 @@ class InputboxControl extends React.Component {
             return;
         }
 
-        IMController.sendImage(msg, content, chat.conv);
+        IMController.sendImage(msg, content.photo.data, file.name, chat.conv);
     };
 
     handlePaste = event => {
@@ -238,7 +251,37 @@ class InputboxControl extends React.Component {
             document.execCommand('insertText', false, plainText);
             return;
         }
-    }
+    };
+
+    handleSendDocument = file => {
+        if (!file) return;
+        console.log("handleSendDocument", file)
+
+        const content = {
+            '@type': 'inputMessageDocument',
+            document: { '@type': 'inputFileBlob', name: file.name, data: file }
+        };
+
+        const fileBean = new msg_pb.FileBean();
+        fileBean.setSize(file.size);
+        fileBean.setName(file.name);
+        // fileBean.setMd5();
+
+        const msg = new msg_pb.Msg();
+        msg.setConversationid(this.state.chatId);
+        msg.setCid(AppStore.getCid());
+        msg.setType(msg_pb.MsgType.FILE);
+        msg.setJetts(Date.now());
+        msg.setBlob(fileBean.serializeBinary())
+
+        const chat = ChatStore.get(this.state.chatId);
+        if (!chat) {
+            console.error("sendMessage failed!")
+            return;
+        }
+
+        IMController.sendFile(msg, content.document.data, file.name, chat.conv);
+     };
 
     sendMessage = async (inputContent, b, f) => {
         const msg = new msg_pb.Msg();
