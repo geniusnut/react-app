@@ -28,6 +28,7 @@ class MessageStore extends EventEmitter {
         this.items = new Map();
         this.unread = new Map();
         this.loaded = new Set();
+        this.maxIds = new Map();
     };
 
     addIMListener() {
@@ -41,7 +42,20 @@ class MessageStore extends EventEmitter {
                 const msg = update.msg;
                 this.set(msg);
                 this.addUnreadMsg(msg);
+                update = {chat_id: msg.getConversationid(), ...update}
                 this.emit("tgtMsgSend", update);
+                break;
+            }
+            case 'messagePull': {
+                const {msgs, finished} = update
+                let inserted = false;
+                msgs.forEach( msg => {
+                    if (!this.contains(msg)) {
+                        this.set(msg)
+                        inserted = true
+                    }
+                });
+                inserted && this.emit("tgtMsgSend", update);
                 break;
             }
             case 'msgAck': {
@@ -72,6 +86,14 @@ class MessageStore extends EventEmitter {
                 });
                 break;
             }
+            case 'messageUpdate': {
+                const  {convId, msgId} = update;
+                console.log("messageUpdate", {convId: convId}, {msgId: msgId}, {lastMsgId: this.getLastMsgId(convId)})
+                if (msgId > this.getLastMsgId(convId)) {
+                    IMController.pullMessage(convId, this.getLastMsgId(convId))
+                }
+                break
+            }
         }
     };
 
@@ -93,6 +115,14 @@ class MessageStore extends EventEmitter {
         this.emit(update['@type'], update);
     };
 
+    contains(message) {
+        if (!message) return false;
+        let chat = this.items.get(message.getConversationid());
+        if (!chat) return false;
+        if (chat.get(message.getConversationid()) || chat.get(message.getJetts())) return true;
+        return false;
+    }
+
     set(message) {
         if (!message) return;
 
@@ -104,6 +134,9 @@ class MessageStore extends EventEmitter {
 
         const m = {state: StateEnum.STATE_RECEIPT, msg: message, ts: message.getAckts() / 1000_000}
         chat.set(message.getId(), m);
+        if (this.maxIds.get(message.getConversationid()) || 0 < message.getId()) {
+            this.maxIds.set(message.getConversationid(), message.getId())
+        }
         CacheStore.saveMessage(message.getConversationid(), message.getId(), m)
     }
 
@@ -229,6 +262,10 @@ class MessageStore extends EventEmitter {
         }
         // chat.values.
         return Array.from(chat.values()).sort((a,b) => ((a.ts > b.ts) ? 1 : -1));
+    }
+
+    getLastMsgId(chatId) {
+        return this.maxIds.get(chatId) || 0
     }
 
     addUnreadMsg(msg) {

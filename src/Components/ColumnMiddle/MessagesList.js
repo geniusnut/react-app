@@ -62,11 +62,10 @@ class MessagesList extends React.Component {
     }
 
     onNewMessage = update => {
-        const { msg } = update;
+        const { chat_id, msg} = update;
         const { chatId } = this.props;
-        console.log(chatId, msg.getConversationid());
-        if (chatId !== msg.getConversationid()) return;
-        IMController.readMessage(chatId, msg);
+        if (chatId !== chat_id) return;
+        msg && IMController.readMessage(chatId, msg);
 
         this.setState({history:MessageStore.getMessages(chatId)})
 

@@ -40,8 +40,12 @@ message MsgRead {
 }
 
 message MsgList {
-    int32 limit = 1;
-    repeated Msg msgs = 2;
+    bool direct = 1;
+    bool finished = 2;
+    string convId = 3;
+    int64 lastId = 4;
+    int32 limit = 5;
+    repeated Msg msgs = 6;
 }
 
 message Image {
@@ -49,8 +53,8 @@ message Image {
     string cachePath = 2;
     string filename = 3;
     string imgUrl = 4;
-    int32 width = 5;
-    int32 height = 6;
+    string width = 5;
+    string height = 6;
 }
 
 message AuxiliaryMsg {

@@ -26,8 +26,8 @@ class DialogBadge extends React.Component {
 
     onNewMessage = update => {
         const { chatId } = this.props;
-        if (!update.msg) return;
-        if (update.msg.getConversationid() !== chatId) return;
+        if (!update.chat_id) return;
+        if (update.chat_id !== chatId) return;
 
         this.forceUpdate();
     };

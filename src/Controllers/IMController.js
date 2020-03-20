@@ -121,8 +121,41 @@ class IMController extends EventEmitter {
 
                 break;
             }
+            case im_pb.IMOperation.CONVERSATIONMESSAGEUPDATE: {
+                const update = im_pb.MessageUpdate.deserializeBinary(response.getBlob())
+                this.emit("update", {
+                    '@type': 'messageUpdate',
+                    convId: update.getConvid(),
+                    msgId: update.getMsgid(),
+                });
+                break;
+            }
+            case im_pb.IMOperation.CONVERSATIONMESSAGEPULL: {
+                const msgs = msg_pb.MsgList.deserializeBinary(response.getBlob())
+                if (msgs.getMsgsList().length === 0) return;
+                this.emit("update", {
+                    '@type': 'messagePull',
+                    msgs: msgs.getMsgsList(),
+                    chat_id: msgs.getConvid(),
+                    finshed: msgs.getFinished(),
+                });
+                break;
+            }
         }
     }
+
+    pullMessage = (convId, msgId) => {
+        const msgPull = new im_pb.MessagePull();
+        msgPull.setDirect(true);
+        msgPull.setMsgid(msgId);
+        msgPull.setConvid(convId);
+        msgPull.setLimit(10);
+        const request = new im_pb.IMRequest();
+        request.setCid(this.state.cid);
+        request.setOperation(im_pb.IMOperation.CONVERSATIONMESSAGEPULL);
+        request.setBlob(msgPull.serializeBinary());
+        this.send(request);
+    };
 
     getImState() {
         return this.ws ? false : this.ws.readyState === this.ws.OPEN;
@@ -137,8 +170,7 @@ class IMController extends EventEmitter {
     };
 
     readMessage(convId, msg) {
-        if (!msg) {
-            console.log("readMessage error: ", convId)
+        if (!msg || msg.getCid() === this.state.cid) {
             return
         }
         const msgRead = new msg_pb.MsgRead();

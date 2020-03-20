@@ -12,6 +12,7 @@ enum IMOperation {
     ClientOpen = 1;
     ClientClose = 2;
     ClientQuery = 3;
+    ClientOnlineState = 4;
 
     ConversationCreation = 1000;
     ConversationMemberAdd = 1001;
@@ -32,10 +33,19 @@ enum IMOperation {
     ConversationExit = 2004;
     ConversationMessageRead = 2005;
 
+    ConversationMessagePush = 2010;
+    ConversationMessagePull = 2011;
+
+    SendBotMessage = 2100;
+    SendMchMessage = 2101;
+
     TargetMessagePush = 3000;
     TargetMessageSend = 3001;
     TargetConvPeerState = 3002;
     TargetMessageRead = 3003;
+
+    TargetBotMessage = 3100;
+    TargetMchMessage = 3101;
 
     Ack = 4000;
     AckClientOpen = 4001;
@@ -45,6 +55,15 @@ enum Code {
     Success = 0;
     ErrNoPermission = 1;
     ErrFailed = 2;
+}
+
+enum OnlineState {
+    Normal = 0;
+    Leave = 1;
+}
+
+message StateMessage {
+    OnlineState state = 1;
 }
 
 message NatsMsg {
@@ -88,9 +107,16 @@ message TgtPeerState {
     bool login = 2;
 }
 
-message MessageQuery {
-    bool direct = 1;
-    int32 limit = 2;
+message MessagePull {
+    string convId = 1;
+    int64 msgId = 2;
+    bool direct = 3; // true new message, false: older ones
+    int32 limit = 4;
+}
+
+message MessageUpdate {
+    string convId = 1;
+    int64 msgId = 2;
 }
 
 message TgtGroupMemberAdded {
@@ -102,4 +128,35 @@ message TgtGroupMemberRemoved {
     string convId = 1;
     string leaver = 2;
     string kicker = 3;
+}
+
+message MchMsg {
+    string fromId = 1;
+    repeated string toCid = 2;
+    bytes message = 3;
+    string hash = 4;
+    int64 ts = 5;
+}
+
+message TgtMchMsg {
+    string fromId = 1;
+    string title = 2;
+    string avatar = 3;
+    IMNut.Msg msg = 4;
+    int64 ts= 5;
+}
+
+message BotMsg {
+    string botId = 1;
+    string fromCid = 2;
+    repeated string toCid = 3;
+    bytes message = 4;
+    string hash = 5;
+    int64 ts = 6;
+}
+
+message TgtBotMsg {
+    string cid = 1;
+    bytes message = 2;
+    int64 ts = 3;
 }

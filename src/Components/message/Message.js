@@ -356,7 +356,7 @@ class Message extends Component {
 
         const sender_user_id = message.msg.getCid();
         const is_outgoing = sender_user_id === AppStore.getCid();
-        const date = msg.getAckts() ? new Date(msg.getAckts() / 1000_000) : msg.getJetts() / 1000;
+        const date = msg.getAckts() ? new Date(msg.getAckts() / 1000_000_000) : msg.getJetts() / 1000;
 
         const inlineMeta = (
             <Meta
